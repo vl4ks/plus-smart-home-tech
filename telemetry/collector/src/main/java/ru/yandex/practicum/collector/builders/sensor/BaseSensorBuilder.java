@@ -2,21 +2,35 @@ package ru.yandex.practicum.collector.builders.sensor;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.avro.specific.SpecificRecordBase;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Value;
-import ru.yandex.practicum.collector.producer.KafkaProducer;
+import ru.yandex.practicum.collector.producer.CollectorKafkaProducer;
 import ru.yandex.practicum.collector.schemas.sensor.BaseSensorEvent;
+import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
 
 @RequiredArgsConstructor
-public abstract class BaseSensorBuilder implements SensorEventBuilder {
-    private final KafkaProducer producer;
+public abstract class BaseSensorBuilder<T extends SpecificRecordBase> implements SensorEventBuilder {
+    private final CollectorKafkaProducer producer;
 
-    @Value("${topic.telemetry-sensors}")
+    @Value("${kafka.topics.sensor}")
     private String topic;
+
+    protected abstract T toAvro(BaseSensorEvent sensorEvent);
 
     @Override
     public void builder(BaseSensorEvent event) {
-        producer.send(toAvro(event), event.getHubId(), event.getTimestamp(), topic);
+        T payload = toAvro(event);
+
+        SensorEventAvro sensorEventAvro = SensorEventAvro.newBuilder()
+                .setId(event.getId())
+                .setHubId(event.getHubId())
+                .setTimestamp(event.getTimestamp())
+                .setPayload(payload)
+                .build();
+
+        ProducerRecord<String, SpecificRecordBase> producerRecord = new ProducerRecord<>(topic, sensorEventAvro);
+
+        producer.send(producerRecord);
     }
 
-    public abstract SpecificRecordBase toAvro(BaseSensorEvent sensorEvent);
 }

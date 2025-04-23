@@ -7,46 +7,41 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.yandex.practicum.collector.builders.hub.HubEventBuilder;
+import ru.yandex.practicum.collector.builders.sensor.SensorEventBuilder;
 import ru.yandex.practicum.collector.schemas.hub.BaseHubEvent;
+import ru.yandex.practicum.collector.schemas.hub.HubEventType;
 import ru.yandex.practicum.collector.schemas.sensor.BaseSensorEvent;
-import ru.yandex.practicum.collector.service.CollectorService;
+import ru.yandex.practicum.collector.schemas.sensor.SensorEventType;
+
+import java.util.Map;
+
 
 @Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/events")
 public class CollectorController {
-    private final CollectorService collectorService;
+    private final Map<SensorEventType, SensorEventBuilder> sensorBuilders;
+    private final Map<HubEventType, HubEventBuilder> hubBuilders;
 
     @PostMapping("/sensors")
     public void collectSensorEvent(@Valid @RequestBody BaseSensorEvent sensor) {
-        try {
-            log.info("Получено событие датчика: type={}, deviceId={}, timestamp={}",
-                    sensor.getType(), sensor.getId(), sensor.getTimestamp());
-
-            collectorService.collectSensorEvent(sensor);
-
-            log.debug("Sensor событие успешно обработано: deviceId={}", sensor.getId());
-        } catch (Exception e) {
-            log.error("Не удалось обработать событие датчика: deviceId={}, error={}",
-                    sensor != null ? sensor.getId() : "null", e.getMessage(), e);
-            throw new RuntimeException("Не удалось обработать событие датчика", e);
+        if (sensorBuilders.containsKey(sensor.getType())) {
+            log.info("Обработка события датчика: {}", sensor);
+            sensorBuilders.get(sensor.getType()).builder(sensor);
+        } else {
+            log.warn("Неизвестный тип события датчика: {}", sensor.getType());
         }
     }
 
     @PostMapping("/hubs")
     public void collectHubEvent(@Valid @RequestBody BaseHubEvent hub) {
-        try {
-            log.info("Полученное событие хаба: type={}, hubId={}, timestamp={}",
-                    hub.getType(), hub.getHubId(), hub.getTimestamp());
-
-            collectorService.collectHubEvent(hub);
-
-            log.debug("Событие хаба успешно обработано: hubId={}", hub.getHubId());
-        } catch (Exception e) {
-            log.error("Не удалось обработать событие хаба: hubId={}, error={}",
-                    hub != null ? hub.getHubId() : "null", e.getMessage(), e);
-            throw new RuntimeException("Не удалось обработать событие хаба", e);
+        if (hubBuilders.containsKey(hub.getType())) {
+            log.info("Обработка события хаба: {}", hub);
+            hubBuilders.get(hub.getType()).builder(hub);
+        } else {
+            log.warn("Неизвестный тип события хаба: {}", hub.getType());
         }
     }
 }

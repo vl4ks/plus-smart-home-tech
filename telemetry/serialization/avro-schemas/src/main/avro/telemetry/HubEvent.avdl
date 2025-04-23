@@ -43,7 +43,8 @@ enum DeviceTypeAvro {
 		string sensor_id;
 		ConditionTypeAvro type;
 		ConditionOperationAvro operation;
-		union{null, boolean, int} value = null;
+		@logicalType("boolean")
+        int? value = null;
 	}
 
 	record DeviceActionAvro {

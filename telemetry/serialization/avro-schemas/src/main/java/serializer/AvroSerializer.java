@@ -5,33 +5,29 @@ import org.apache.avro.io.DatumWriter;
 import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.avro.specific.SpecificRecordBase;
+import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.serialization.Serializer;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
-@SuppressWarnings("unused")
 public class AvroSerializer implements Serializer<SpecificRecordBase> {
-    @Override
-    public byte[] serialize(String topic, SpecificRecordBase input) throws SerializationException {
-        if (input == null) {
-            return null;
-        }
-        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+    private final EncoderFactory encoderFactory = EncoderFactory.get();
+    private BinaryEncoder encoder;
 
-            DatumWriter<SpecificRecordBase> datumWriter = new SpecificDatumWriter<>(input.getSchema());
-
-            BinaryEncoder encoder = EncoderFactory.get().binaryEncoder(outputStream, null);
-
-            datumWriter.write(input, encoder);
-
-            encoder.flush();
-
-            outputStream.close();
-
-            return outputStream.toByteArray();
-
-        } catch (Exception e) {
-            throw new SerializationException("Ошибка сериализации, topic:" + topic);
+    public byte[] serialize(String topic, SpecificRecordBase data) {
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            byte[] result = null;
+            encoder = encoderFactory.binaryEncoder(out, encoder);
+            if (data != null) {
+                DatumWriter<SpecificRecordBase> writer = new SpecificDatumWriter<>(data.getSchema());
+                writer.write(data, encoder);
+                encoder.flush();
+                result = out.toByteArray();
+            }
+            return result;
+        } catch (IOException e) {
+            throw new SerializationException("Ошибка сериализации, topic:" + topic, e);
         }
     }
 }

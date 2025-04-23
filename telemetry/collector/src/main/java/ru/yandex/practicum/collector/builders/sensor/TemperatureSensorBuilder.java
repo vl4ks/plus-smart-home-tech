@@ -1,28 +1,29 @@
 package ru.yandex.practicum.collector.builders.sensor;
 
-import org.apache.avro.specific.SpecificRecordBase;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.collector.producer.KafkaProducer;
+import ru.yandex.practicum.collector.producer.CollectorKafkaProducer;
 import ru.yandex.practicum.collector.schemas.sensor.BaseSensorEvent;
+import ru.yandex.practicum.collector.schemas.sensor.SensorEventType;
 import ru.yandex.practicum.collector.schemas.sensor.TemperatureSensorEvent;
-import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.TemperatureSensorAvro;
 
 @Component
-public class TemperatureSensorBuilder extends BaseSensorBuilder {
-    public TemperatureSensorBuilder(KafkaProducer producer) {
+public class TemperatureSensorBuilder extends BaseSensorBuilder<TemperatureSensorAvro> {
+    public TemperatureSensorBuilder(CollectorKafkaProducer producer) {
         super(producer);
     }
 
     @Override
-    public SpecificRecordBase toAvro(BaseSensorEvent sensorEvent) {
-        TemperatureSensorEvent event = (TemperatureSensorEvent) sensorEvent;
-
-        return SensorEventAvro.newBuilder()
-                .setId(sensorEvent.getId())
-                .setHubId(sensorEvent.getHubId())
-                .setTimestamp(sensorEvent.getTimestamp())
-                .setPayload(new TemperatureSensorAvro(event.getTemperatureC(), event.getTemperatureF()))
+    protected TemperatureSensorAvro toAvro(BaseSensorEvent sensorEvent) {
+        TemperatureSensorEvent temperatureSensorEvent = (TemperatureSensorEvent) sensorEvent;
+        return TemperatureSensorAvro.newBuilder()
+                .setTemperatureC(temperatureSensorEvent.getTemperatureC())
+                .setTemperatureF(temperatureSensorEvent.getTemperatureF())
                 .build();
+    }
+
+    @Override
+    public SensorEventType getEventType() {
+        return SensorEventType.TEMPERATURE_SENSOR_EVENT;
     }
 }

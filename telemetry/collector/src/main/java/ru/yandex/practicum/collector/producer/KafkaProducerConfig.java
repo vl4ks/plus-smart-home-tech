@@ -1,33 +1,37 @@
 package ru.yandex.practicum.collector.producer;
 
 import org.apache.avro.specific.SpecificRecordBase;
-import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import serializer.AvroSerializer;
 
 import java.util.Properties;
 
+import static org.apache.kafka.clients.producer.ProducerConfig.*;
+
 @Configuration
 public class KafkaProducerConfig {
-    @Value("${spring.kafka.producer.bootstrap-servers}")
+    private KafkaProducer<String, SpecificRecordBase> producer;
+
+    @Value("${kafka.bootstrap-server}")
     private String bootstrapServers;
 
-    @Value("${spring.kafka.producer.key-serializer}")
-    private String keySerializer;
-
-    @Value("${spring.kafka.producer.value-serializer}")
-    private String valueSerializer;
-
     @Bean
-    public Producer<String, SpecificRecordBase> getProducer() {
-        Properties config = new Properties();
-        config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, keySerializer);
-        config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, valueSerializer);
+    public KafkaProducer<String, SpecificRecordBase> getProducer() {
+        if (producer == null) {
+            initProducer();
+        }
+        return producer;
+    }
 
-        return new KafkaProducer<>(config);
+    private void initProducer() {
+        Properties config = new Properties();
+        config.put(BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        config.put(KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        config.put(VALUE_SERIALIZER_CLASS_CONFIG, AvroSerializer.class.getName());
+        producer = new KafkaProducer<>(config);
     }
 }

@@ -8,9 +8,9 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.Future;
 
 @Slf4j
 @Component
@@ -18,31 +18,31 @@ import java.util.concurrent.TimeoutException;
 public class CollectorKafkaProducer implements AutoCloseable {
     private final KafkaProducer<String, SpecificRecordBase> producer;
 
-    private static final long SEND_TIMEOUT_MS = 5000;
-
-    public void send(ProducerRecord<String, SpecificRecordBase> record) {
-        if (record == null) {
-            log.warn("Попытка отправить null-запись в Kafka");
+    public void send(String topic, Instant timestamp, String hubId, SpecificRecordBase event) {
+        if (event == null) {
+            log.warn("Попытка отправить null-событие в Kafka");
             return;
         }
 
+        ProducerRecord<String, SpecificRecordBase> record = new ProducerRecord<>(
+                topic,
+                null,
+                timestamp.toEpochMilli(),
+                hubId,
+                event
+        );
+
+        String eventClass = event.getClass().getSimpleName();
+
+        Future<RecordMetadata> futureResult = producer.send(record);
+        producer.flush();
+
         try {
-            log.debug("Отправка записи в топик {}: key={}, value={}",
-                    record.topic(), record.key(), record.value());
-
-            RecordMetadata metadata = producer.send(record)
-                    .get(SEND_TIMEOUT_MS, TimeUnit.MILLISECONDS);
-
-            log.info("Сообщение успешно отправлено в топик {}, partition {}, offset {}",
-                    metadata.topic(), metadata.partition(), metadata.offset());
-
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            log.error("Отправка сообщения прервана: топик {}", record.topic(), e);
-        } catch (ExecutionException e) {
-            log.error("Ошибка при отправке сообщения в топик {}", record.topic(), e);
-        } catch (TimeoutException e) {
-            log.error("Таймаут при отправке сообщения в топик {}", record.topic(), e);
+            RecordMetadata metadata = futureResult.get();
+            log.info("Событие {} было успешно сохранёно в топик {} в партицию {} со смещением {}",
+                    eventClass, metadata.topic(), metadata.partition(), metadata.offset());
+        } catch (InterruptedException | ExecutionException e) {
+            log.warn("Не удалось записать событие {} в топик {}", eventClass, topic, e);
         }
     }
 

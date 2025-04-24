@@ -2,7 +2,6 @@ package ru.yandex.practicum.collector.builders.sensor;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.avro.specific.SpecificRecordBase;
-import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Value;
 import ru.yandex.practicum.collector.producer.CollectorKafkaProducer;
 import ru.yandex.practicum.collector.schemas.sensor.BaseSensorEvent;
@@ -28,9 +27,11 @@ public abstract class BaseSensorBuilder<T extends SpecificRecordBase> implements
                 .setPayload(payload)
                 .build();
 
-        ProducerRecord<String, SpecificRecordBase> producerRecord = new ProducerRecord<>(topic, sensorEventAvro);
-
-        producer.send(producerRecord);
+        producer.send(
+                topic,
+                event.getTimestamp(),
+                event.getId(),
+                sensorEventAvro
+        );
     }
-
 }

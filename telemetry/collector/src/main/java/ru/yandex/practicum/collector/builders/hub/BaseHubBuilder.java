@@ -1,7 +1,6 @@
 package ru.yandex.practicum.collector.builders.hub;
 
 import org.apache.avro.specific.SpecificRecordBase;
-import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Value;
 import ru.yandex.practicum.collector.producer.CollectorKafkaProducer;
 import ru.yandex.practicum.collector.schemas.hub.BaseHubEvent;
@@ -27,7 +26,11 @@ public abstract class BaseHubBuilder<T extends SpecificRecordBase> implements Hu
                 .setPayload(payload)
                 .build();
 
-        ProducerRecord<String, SpecificRecordBase> record = new ProducerRecord<>(topic, hubEventAvro);
-        producer.send(record);
+        producer.send(
+                topic,
+                event.getTimestamp(),
+                event.getHubId(),
+                hubEventAvro
+        );
     }
 }

@@ -33,6 +33,8 @@ public class CollectorKafkaProducer implements AutoCloseable {
         );
 
         String eventClass = event.getClass().getSimpleName();
+        log.debug("Отправка события {} в топик {}: хаб ={}, событие ={}",
+                eventClass, topic, hubId, event);
 
         Future<RecordMetadata> futureResult = producer.send(record);
         producer.flush();

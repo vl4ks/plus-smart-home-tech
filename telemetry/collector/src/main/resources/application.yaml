@@ -1,6 +1,7 @@
-#file: noinspection undefined
 kafka:
   bootstrap-server: "localhost:9092"
+  key-serializer: "org.apache.kafka.common.serialization.StringSerializer"
+  value-serializer: "serializer.AvroSerializer"
   topics:
     sensor: "telemetry.sensors.v1"
     hub: "telemetry.hubs.v1"

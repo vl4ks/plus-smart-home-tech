@@ -1,47 +1,65 @@
 package ru.yandex.practicum.collector.controller;
 
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import com.google.protobuf.Empty;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
+import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import net.devh.boot.grpc.server.service.GrpcService;
 import ru.yandex.practicum.collector.builders.hub.HubEventBuilder;
 import ru.yandex.practicum.collector.builders.sensor.SensorEventBuilder;
-import ru.yandex.practicum.collector.schemas.hub.BaseHubEvent;
-import ru.yandex.practicum.collector.schemas.hub.HubEventType;
-import ru.yandex.practicum.collector.schemas.sensor.BaseSensorEvent;
-import ru.yandex.practicum.collector.schemas.sensor.SensorEventType;
+import ru.yandex.practicum.grpc.telemetry.collector.CollectorControllerGrpc.CollectorControllerImplBase;
+import ru.yandex.practicum.grpc.telemetry.event.HubEventProto;
+import ru.yandex.practicum.grpc.telemetry.event.SensorEventProto;
 
 import java.util.Map;
 
-
 @Slf4j
-@RestController
-@RequiredArgsConstructor
-@RequestMapping("/events")
-public class CollectorController {
-    private final Map<SensorEventType, SensorEventBuilder> sensorBuilders;
-    private final Map<HubEventType, HubEventBuilder> hubBuilders;
+@GrpcService
+public class CollectorController extends CollectorControllerImplBase {
+    private final Map<SensorEventProto.PayloadCase, SensorEventBuilder> sensorBuilders;
+    private final Map<HubEventProto.PayloadCase, HubEventBuilder> hubBuilders;
 
-    @PostMapping("/sensors")
-    public void collectSensorEvent(@Valid @RequestBody BaseSensorEvent sensor) {
-        if (sensorBuilders.containsKey(sensor.getType())) {
-            log.info("Обработка события датчика: {}", sensor);
-            sensorBuilders.get(sensor.getType()).builder(sensor);
-        } else {
-            log.warn("Неизвестный тип события датчика: {}", sensor.getType());
+    public CollectorController(
+            Map<SensorEventProto.PayloadCase, SensorEventBuilder> sensorBuilders,
+            Map<HubEventProto.PayloadCase, HubEventBuilder> hubBuilders) {
+        this.sensorBuilders = sensorBuilders;
+        this.hubBuilders = hubBuilders;
+    }
+
+    @Override
+    public void collectSensorEvent(SensorEventProto request, StreamObserver<Empty> responseObserver) {
+        try {
+            if (sensorBuilders.containsKey(request.getPayloadCase())) {
+                log.info("Обработка события датчика: {}", request);
+                sensorBuilders.get(request.getPayloadCase()).builder(request);
+            } else {
+                throw new IllegalArgumentException("Не найден обработчик для события " + request.getPayloadCase());
+            }
+            responseObserver.onNext(Empty.getDefaultInstance());
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            responseObserver.onError(new StatusRuntimeException(
+                    Status.fromThrowable(e)
+            ));
         }
     }
 
-    @PostMapping("/hubs")
-    public void collectHubEvent(@Valid @RequestBody BaseHubEvent hub) {
-        if (hubBuilders.containsKey(hub.getType())) {
-            log.info("Обработка события хаба: {}", hub);
-            hubBuilders.get(hub.getType()).builder(hub);
-        } else {
-            log.warn("Неизвестный тип события хаба: {}", hub.getType());
+    @Override
+    public void collectHubEvent(HubEventProto request, StreamObserver<Empty> responseObserver) {
+        try {
+            if (hubBuilders.containsKey(request.getPayloadCase())) {
+                log.info("Обработка события хаба: {}", request);
+                hubBuilders.get(request.getPayloadCase()).builder(request);
+            } else {
+                throw new IllegalArgumentException("Не найден обработчик для события " + request.getPayloadCase());
+            }
+            responseObserver.onNext(Empty.getDefaultInstance());
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            responseObserver.onError(new StatusRuntimeException(
+                    Status.fromThrowable(e)
+            ));
         }
     }
 }

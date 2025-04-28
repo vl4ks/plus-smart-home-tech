@@ -1,10 +1,9 @@
 package ru.yandex.practicum.collector.builders.sensor;
 
-import ru.yandex.practicum.collector.schemas.sensor.BaseSensorEvent;
-import ru.yandex.practicum.collector.schemas.sensor.SensorEventType;
+import ru.yandex.practicum.grpc.telemetry.event.SensorEventProto;
 
 public interface SensorEventBuilder {
-    SensorEventType getEventType();
+    SensorEventProto.PayloadCase getEventType();
 
-    void builder(BaseSensorEvent event);
+    void builder(SensorEventProto event);
 }

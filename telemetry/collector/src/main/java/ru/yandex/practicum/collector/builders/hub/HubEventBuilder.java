@@ -1,10 +1,9 @@
 package ru.yandex.practicum.collector.builders.hub;
 
-import ru.yandex.practicum.collector.schemas.hub.BaseHubEvent;
-import ru.yandex.practicum.collector.schemas.hub.HubEventType;
+import ru.yandex.practicum.grpc.telemetry.event.HubEventProto;
 
 public interface HubEventBuilder {
-    HubEventType getEventType();
+    HubEventProto.PayloadCase getEventType();
 
-    void builder(BaseHubEvent hubEvent);
+    void builder(HubEventProto hubEvent);
 }

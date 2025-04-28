@@ -4,8 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.springframework.beans.factory.annotation.Value;
 import ru.yandex.practicum.collector.producer.CollectorKafkaProducer;
-import ru.yandex.practicum.collector.schemas.sensor.BaseSensorEvent;
+import ru.yandex.practicum.grpc.telemetry.event.SensorEventProto;
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
+
+import java.time.Instant;
 
 @RequiredArgsConstructor
 public abstract class BaseSensorBuilder<T extends SpecificRecordBase> implements SensorEventBuilder {
@@ -14,22 +16,24 @@ public abstract class BaseSensorBuilder<T extends SpecificRecordBase> implements
     @Value("${kafka.topics.sensor}")
     private String topic;
 
-    protected abstract T toAvro(BaseSensorEvent sensorEvent);
+    protected abstract T toAvro(SensorEventProto sensorEvent);
 
     @Override
-    public void builder(BaseSensorEvent event) {
+    public void builder(SensorEventProto event) {
         T payload = toAvro(event);
 
         SensorEventAvro sensorEventAvro = SensorEventAvro.newBuilder()
                 .setId(event.getId())
                 .setHubId(event.getHubId())
-                .setTimestamp(event.getTimestamp())
+                .setTimestamp(Instant.ofEpochSecond(
+                        event.getTimestamp().getSeconds(),
+                        event.getTimestamp().getNanos()))
                 .setPayload(payload)
                 .build();
 
         producer.send(
                 topic,
-                event.getTimestamp(),
+                Instant.ofEpochSecond(event.getTimestamp().getSeconds(), event.getTimestamp().getNanos()),
                 event.getId(),
                 sensorEventAvro
         );

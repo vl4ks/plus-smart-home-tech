@@ -5,6 +5,7 @@ import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.SensorStateAvro;
 import ru.yandex.practicum.kafka.telemetry.event.SensorsSnapshotAvro;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -14,11 +15,12 @@ public class SnapshotProcessor {
     private final Map<String, SensorsSnapshotAvro> snapshotAvroMap = new HashMap<>();
 
     Optional<SensorsSnapshotAvro> updateState(SensorEventAvro event) {
-        SensorsSnapshotAvro snapshot = snapshotAvroMap.getOrDefault(event.getHubId(), SensorsSnapshotAvro.newBuilder()
-                .setHubId(event.getHubId())
-                .setTimestamp(event.getTimestamp())
-                .setSensorsState(new HashMap<>())
-                .build());
+        SensorsSnapshotAvro snapshot = snapshotAvroMap.getOrDefault(event.getHubId(),
+                SensorsSnapshotAvro.newBuilder()
+                        .setHubId(event.getHubId())
+                        .setTimestamp(Instant.now())
+                        .setSensorsState(new HashMap<>())
+                        .build());
 
         SensorStateAvro oldState = snapshot.getSensorsState().get(event.getId());
         if (oldState != null) {

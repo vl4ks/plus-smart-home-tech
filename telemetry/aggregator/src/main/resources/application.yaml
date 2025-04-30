@@ -4,9 +4,11 @@ spring:
 kafka:
   bootstrap-servers: localhost:9092
   consumer:
-    group-id: aggregator
+    client-id: SensorEventConsumer
+    group-id: sensorEvent.group.id
     key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
     value-deserializer: deserializer.SensorEventDeserializer
+    enable-auto-commit: false
   producer:
     key-serializer: org.apache.kafka.common.serialization.StringSerializer
     value-serializer: serializer.AvroSerializer

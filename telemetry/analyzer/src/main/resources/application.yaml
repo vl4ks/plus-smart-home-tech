@@ -41,3 +41,10 @@ grpc:
       enableKeepAlive: true
       keepAliveWithoutCalls: true
       negotiationType: plaintext
+
+threadPool:
+  arrayBlockingQueue:
+    capacity: 2
+  corePoolSize: 2
+  maximumPoolSize: 2
+  keepAliveTime: 60

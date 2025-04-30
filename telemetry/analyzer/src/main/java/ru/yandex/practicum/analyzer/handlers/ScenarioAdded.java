@@ -1,4 +1,4 @@
-package ru.yandex.practicum.handlers;
+package ru.yandex.practicum.analyzer.handlers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,13 +8,13 @@ import ru.yandex.practicum.kafka.telemetry.event.DeviceActionAvro;
 import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.ScenarioAddedEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.ScenarioConditionAvro;
-import ru.yandex.practicum.model.Action;
-import ru.yandex.practicum.model.Condition;
-import ru.yandex.practicum.model.Scenario;
-import ru.yandex.practicum.repository.ActionRepository;
-import ru.yandex.practicum.repository.ConditionRepository;
-import ru.yandex.practicum.repository.ScenarioRepository;
-import ru.yandex.practicum.repository.SensorRepository;
+import ru.yandex.practicum.analyzer.model.Action;
+import ru.yandex.practicum.analyzer.model.Condition;
+import ru.yandex.practicum.analyzer.model.Scenario;
+import ru.yandex.practicum.analyzer.repository.ActionRepository;
+import ru.yandex.practicum.analyzer.repository.ConditionRepository;
+import ru.yandex.practicum.analyzer.repository.ScenarioRepository;
+import ru.yandex.practicum.analyzer.repository.SensorRepository;
 
 import java.util.Set;
 import java.util.stream.Collectors;

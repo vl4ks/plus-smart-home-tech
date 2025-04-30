@@ -1,4 +1,4 @@
-package ru.yandex.practicum.model;
+package ru.yandex.practicum.analyzer.model;
 
 import jakarta.persistence.*;
 import lombok.*;

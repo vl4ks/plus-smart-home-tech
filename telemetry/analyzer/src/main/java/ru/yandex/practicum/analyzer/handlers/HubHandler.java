@@ -1,4 +1,4 @@
-package ru.yandex.practicum.handlers;
+package ru.yandex.practicum.analyzer.handlers;
 
 import lombok.Getter;
 import org.springframework.stereotype.Component;

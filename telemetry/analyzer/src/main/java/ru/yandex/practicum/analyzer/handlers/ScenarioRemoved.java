@@ -1,4 +1,4 @@
-package ru.yandex.practicum.handlers;
+package ru.yandex.practicum.analyzer.handlers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -6,10 +6,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.ScenarioRemovedEventAvro;
-import ru.yandex.practicum.model.Scenario;
-import ru.yandex.practicum.repository.ActionRepository;
-import ru.yandex.practicum.repository.ConditionRepository;
-import ru.yandex.practicum.repository.ScenarioRepository;
+import ru.yandex.practicum.analyzer.model.Scenario;
+import ru.yandex.practicum.analyzer.repository.ActionRepository;
+import ru.yandex.practicum.analyzer.repository.ConditionRepository;
+import ru.yandex.practicum.analyzer.repository.ScenarioRepository;
 
 import java.util.Optional;
 

@@ -1,4 +1,4 @@
-package ru.yandex.practicum;
+package ru.yandex.practicum.hubrouterclient;
 
 import com.google.protobuf.Empty;
 import io.grpc.Status;

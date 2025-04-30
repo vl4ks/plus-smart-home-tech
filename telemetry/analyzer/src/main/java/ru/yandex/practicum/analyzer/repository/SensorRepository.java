@@ -1,7 +1,7 @@
-package ru.yandex.practicum.repository;
+package ru.yandex.practicum.analyzer.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import ru.yandex.practicum.model.Sensor;
+import ru.yandex.practicum.analyzer.model.Sensor;
 
 import java.util.Collection;
 import java.util.Optional;

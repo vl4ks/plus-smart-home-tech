@@ -1,4 +1,4 @@
-package ru.yandex.practicum.client;
+package ru.yandex.practicum.analyzer.client;
 
 import com.google.protobuf.Timestamp;
 import io.grpc.StatusRuntimeException;
@@ -10,7 +10,7 @@ import ru.yandex.practicum.grpc.telemetry.event.DeviceActionProto;
 import ru.yandex.practicum.grpc.telemetry.event.DeviceActionRequest;
 import ru.yandex.practicum.grpc.telemetry.hubrouter.HubRouterControllerGrpc;
 import ru.yandex.practicum.kafka.telemetry.event.ActionTypeAvro;
-import ru.yandex.practicum.model.Action;
+import ru.yandex.practicum.analyzer.model.Action;
 
 import java.time.Instant;
 

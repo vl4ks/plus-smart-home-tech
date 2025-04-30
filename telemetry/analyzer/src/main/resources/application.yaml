@@ -1,16 +1,20 @@
 spring:
   kafka:
     bootstrap-servers: localhost:9092
+
     consumer:
       client-id: HubEventConsumer
       group-id: hubEvent.group.id
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: deserializer.HubEventDeserializer
       enable-auto-commit: false
+
       snapshots:
         client-id: SnapshotsConsumer
         group-id: snapshot.group.id
-        deserializer: deserializer.SnapshotDeserializer
+        key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+        value-deserializer: deserializer.SnapshotDeserializer
+        enable-auto-commit: false
 
   jpa:
     hibernate:
@@ -30,9 +34,10 @@ spring:
     username: username
     password: password
 
-topic:
-  snapshots-topic: telemetry.snapshots.v1
-  hub-event-topic: telemetry.hubs.v1
+kafka:
+  topics:
+    hub-events: telemetry.hubs.v1
+    snapshots: telemetry.snapshots.v1
 
 grpc:
   client:
@@ -41,10 +46,3 @@ grpc:
       enableKeepAlive: true
       keepAliveWithoutCalls: true
       negotiationType: plaintext
-
-threadPool:
-  arrayBlockingQueue:
-    capacity: 2
-  corePoolSize: 2
-  maximumPoolSize: 2
-  keepAliveTime: 60

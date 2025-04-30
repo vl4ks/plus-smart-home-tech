@@ -42,7 +42,7 @@ public class KafkaConsumerProperties {
         properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
                 environment.getProperty("spring.kafka.consumer.key-deserializer"));
         properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-                environment.getProperty("spring.kafka.consumer.snapshots.deserializer"));
+                environment.getProperty("spring.kafka.consumer.snapshots.value-deserializer"));
         properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG,
                 environment.getProperty("spring.kafka.consumer.enable-auto-commit"));
 

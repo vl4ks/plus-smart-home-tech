@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.analyzer.client.HubRouterClient;
+import ru.yandex.practicum.analyzer.model.Action;
 import ru.yandex.practicum.kafka.telemetry.event.*;
 import ru.yandex.practicum.analyzer.model.Condition;
 import ru.yandex.practicum.analyzer.model.Scenario;
@@ -24,20 +25,23 @@ public class SnapshotHandler {
     private final HubRouterClient hubRouterClient;
 
     public void buildSnapshot(SensorsSnapshotAvro sensorsSnapshot) {
-        log.debug("Получен снапшот {} ", sensorsSnapshot);
+        log.info("Начало обработки снапшота для хаба {}", sensorsSnapshot.getHubId());
 
-        Map<String, SensorStateAvro> sensorStateMap = sensorsSnapshot.getSensorsState();
-        List<Scenario> scenarios = scenarioRepository.findByHubId(sensorsSnapshot.getHubId());
+        try {
+            Map<String, SensorStateAvro> sensorStateMap = sensorsSnapshot.getSensorsState();
+            List<Scenario> scenarios = scenarioRepository.findByHubId(sensorsSnapshot.getHubId());
 
-        log.debug("Найдено {} сценариев для хаба {}", scenarios.size(), sensorsSnapshot.getHubId());
+            log.debug("Найдено сценариев: {}", scenarios.size());
 
-        scenarios.stream()
-                .filter(scenario -> handleScenario(scenario, sensorStateMap))
-                .forEach(scenario -> {
-                    log.info("Отправка действий для сценария {}", scenario.getName());
+            scenarios.forEach(scenario -> {
+                if (handleScenario(scenario, sensorStateMap)) {
+                    log.info("Условия сценария '{}' выполнены", scenario.getName());
                     sendScenarioActions(scenario);
-                });
-        log.info("Обработка снапшота для хаба завершена {}", sensorsSnapshot.getHubId());
+                }
+            });
+        } catch (Exception e) {
+            log.error("Ошибка обработки снапшота", e);
+        }
     }
 
     private boolean handleScenario(Scenario scenario, Map<String, SensorStateAvro> sensorStateMap) {
@@ -104,6 +108,20 @@ public class SnapshotHandler {
     }
 
     private void sendScenarioActions(Scenario scenario) {
-        actionRepository.findAllByScenario(scenario).forEach(hubRouterClient::sendAction);
+        try {
+            List<Action> actions = actionRepository.findAllByScenario(scenario);
+            log.info("Отправка {} действий для сценария {}", actions.size(), scenario.getName());
+
+            actions.forEach(action -> {
+                try {
+                    hubRouterClient.sendAction(action);
+                    log.debug("Действие {} успешно отправлено", action.getId());
+                } catch (Exception e) {
+                    log.error("Ошибка отправки действия {}", action.getId(), e);
+                }
+            });
+        } catch (Exception e) {
+            log.error("Ошибка получения действий для сценария {}", scenario.getName(), e);
+        }
     }
 }

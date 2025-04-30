@@ -31,24 +31,30 @@ public class ScenarioAdded implements HubEventHandler {
     @Override
     @Transactional
     public void handle(HubEventAvro hubEvent) {
-        ScenarioAddedEventAvro scenarioAddedEvent = (ScenarioAddedEventAvro) hubEvent.getPayload();
-        Scenario scenario = scenarioRepository.findByHubIdAndName(hubEvent.getHubId(),
-                scenarioAddedEvent.getName()).orElseGet(() -> {
-            log.debug("Сценарий не найден, создание нового");
-            return scenarioRepository.save(buildToScenario(hubEvent));
-        });
+        try {
+            ScenarioAddedEventAvro scenarioAddedEvent = (ScenarioAddedEventAvro) hubEvent.getPayload();
+            Scenario scenario = scenarioRepository.findByHubIdAndName(hubEvent.getHubId(),
+                    scenarioAddedEvent.getName()).orElseGet(() -> {
+                log.debug("Сценарий не найден, создание нового");
+                return scenarioRepository.save(buildToScenario(hubEvent));
+            });
 
-        if (checkSensorsInScenarioConditions(scenarioAddedEvent, hubEvent.getHubId())) {
-            Set<Condition> conditions = buildToCondition(scenarioAddedEvent, scenario);
-            conditionRepository.saveAll(conditions);
-            log.info("Сохранено {} условий для сценария", conditions.size());
+            if (checkSensorsInScenarioConditions(scenarioAddedEvent, hubEvent.getHubId())) {
+                Set<Condition> conditions = buildToCondition(scenarioAddedEvent, scenario);
+                conditionRepository.saveAll(conditions);
+                log.info("Сохранено {} условий для сценария", conditions.size());
+            }
+            if (checkSensorsInScenarioActions(scenarioAddedEvent, hubEvent.getHubId())) {
+                Set<Action> actions = buildToAction(scenarioAddedEvent, scenario);
+                actionRepository.saveAll(actions);
+                log.info("Сохранено {} действий для сценария", actions.size());
+            }
+            log.info("Сценарий успешно обработан");
+
+        } catch (Exception e) {
+            log.error("Ошибка сохранения сценария", e);
+            throw new RuntimeException("Не удалось сохранить сценарий", e);
         }
-        if (checkSensorsInScenarioActions(scenarioAddedEvent, hubEvent.getHubId())) {
-            Set<Action> actions = buildToAction(scenarioAddedEvent, scenario);
-            actionRepository.saveAll(actions);
-            log.info("Сохранено {} действий для сценария", actions.size());
-        }
-        log.info("Сценарий успешно обработан");
     }
 
     @Override
@@ -67,7 +73,7 @@ public class ScenarioAdded implements HubEventHandler {
     private Set<Condition> buildToCondition(ScenarioAddedEventAvro scenarioAddedEvent, Scenario scenario) {
         return scenarioAddedEvent.getConditions().stream()
                 .map(c -> Condition.builder()
-                        .sensor(sensorRepository.findById(Long.valueOf(c.getSensorId())).orElseThrow())
+                        .sensor(sensorRepository.findById(c.getSensorId()).orElseThrow())
                         .scenario(scenario)
                         .type(c.getType())
                         .operation(c.getOperation())
@@ -79,7 +85,7 @@ public class ScenarioAdded implements HubEventHandler {
     private Set<Action> buildToAction(ScenarioAddedEventAvro scenarioAddedEvent, Scenario scenario) {
         return scenarioAddedEvent.getActions().stream()
                 .map(action -> Action.builder()
-                        .sensor(sensorRepository.findById(Long.valueOf(action.getSensorId())).orElseThrow())
+                        .sensor(sensorRepository.findById(action.getSensorId()).orElseThrow())
                         .scenario(scenario)
                         .type(action.getType())
                         .value(action.getValue())

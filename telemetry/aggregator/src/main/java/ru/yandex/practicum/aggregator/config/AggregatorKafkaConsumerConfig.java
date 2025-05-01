@@ -4,9 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.ProducerConfig;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -29,8 +26,7 @@ public class AggregatorKafkaConsumerConfig {
                 environment.getProperty("kafka.consumer.key-deserializer"));
         properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
                 environment.getProperty("kafka.consumer.value-deserializer"));
-        properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG,
-                environment.getProperty("kafka.consumer.enable-auto-commit"));
+        properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
 
         return new KafkaConsumer<>(properties);
     }

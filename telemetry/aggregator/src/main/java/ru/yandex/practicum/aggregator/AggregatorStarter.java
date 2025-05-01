@@ -6,8 +6,10 @@ import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.WakeupException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -15,6 +17,7 @@ import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.SensorsSnapshotAvro;
 
 import java.time.Duration;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,24 +44,38 @@ public class AggregatorStarter {
         try {
             consumer.subscribe(List.of(inTopic));
             log.info("Успешно подписался на топик: {}", inTopic);
+
             while (true) {
                 ConsumerRecords<String, SpecificRecordBase> records = consumer.poll(CONSUME_ATTEMPT_TIMEOUT);
 
                 for (ConsumerRecord<String, SpecificRecordBase> record : records) {
+                    try {
+                        log.info("Обработка полученных данных {}", record.value());
+                        SensorEventAvro event = (SensorEventAvro) record.value();
+                        Optional<SensorsSnapshotAvro> snapshotAvro = snapshotProcessor.updateState(event);
 
-                    log.info("Обработка полученных данных {}", record.value());
-                    SensorEventAvro event = (SensorEventAvro) record.value();
-                    Optional<SensorsSnapshotAvro> snapshotAvro = snapshotProcessor.updateState(event);
-                    if (snapshotAvro.isPresent()) {
-                        log.info("Отправка снимка в топик {}: {}", outTopic, snapshotAvro);
+                        if (snapshotAvro.isPresent()) {
+                            log.info("Отправка снимка в топик {}: {}", outTopic, snapshotAvro);
+                            ProducerRecord<String, SpecificRecordBase> message = new ProducerRecord<>(
+                                    outTopic,
+                                    null,
+                                    event.getTimestamp().toEpochMilli(),
+                                    event.getHubId(),
+                                    snapshotAvro.get()
+                            );
 
-                        ProducerRecord<String, SpecificRecordBase> message = new ProducerRecord<>(outTopic,
-                                null, event.getTimestamp().toEpochMilli(), event.getHubId(), snapshotAvro.get());
+                            producer.send(message).get();
+                        }
 
-                        producer.send(message);
+                        consumer.commitSync(Collections.singletonMap(
+                                new TopicPartition(record.topic(), record.partition()),
+                                new OffsetAndMetadata(record.offset() + 1)
+                        ));
+
+                    } catch (Exception e) {
+                        log.error("Ошибка при обработке сообщения со смещением {}: {}", record.offset(), e.getMessage());
                     }
                 }
-                consumer.commitSync();
             }
         } catch (WakeupException ignored) {
         } catch (Exception e) {
@@ -66,8 +83,6 @@ public class AggregatorStarter {
         } finally {
             try {
                 producer.flush();
-                consumer.commitSync();
-
             } finally {
                 log.info("Закрываем consumer");
                 consumer.close();

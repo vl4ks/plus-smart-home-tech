@@ -81,7 +81,7 @@ public class SnapshotHandler {
                 ClimateSensorAvro climateSensor = (ClimateSensorAvro) sensorState.getData();
                 return handleOperation(condition, climateSensor.getHumidity());
             }
-            case null -> {
+            default -> {
                 return false;
             }
         }
@@ -91,20 +91,12 @@ public class SnapshotHandler {
         ConditionOperationAvro conditionOperation = condition.getOperation();
         Integer targetValue = condition.getValue();
 
-        switch (conditionOperation) {
-            case EQUALS -> {
-                return targetValue == currentValue;
-            }
-            case LOWER_THAN -> {
-                return currentValue < targetValue;
-            }
-            case GREATER_THAN -> {
-                return currentValue > targetValue;
-            }
-            case null -> {
-                return null;
-            }
-        }
+        return switch (conditionOperation) {
+            case EQUALS -> targetValue.equals(currentValue);
+            case LOWER_THAN -> currentValue < targetValue;
+            case GREATER_THAN -> currentValue > targetValue;
+            default -> false;
+        };
     }
 
     private void sendScenarioActions(Scenario scenario) {

@@ -17,10 +17,6 @@ public class DeviceAdded implements HubEventHandler {
 
     @Override
     @Transactional
-//    public void handle(HubEventAvro hubEvent) {
-//        Sensor savedSensor = sensorRepository.save(buildToSensor(hubEvent));
-//        log.info("Датчик успешно сохранен в БД: id={}", savedSensor.getId());
-//    }
     public void handle(HubEventAvro hubEvent) {
         DeviceAddedEventAvro deviceAddedEvent = (DeviceAddedEventAvro) hubEvent.getPayload();
         String deviceId = deviceAddedEvent.getId();

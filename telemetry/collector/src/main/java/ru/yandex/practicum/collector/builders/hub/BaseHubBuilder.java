@@ -3,9 +3,11 @@ package ru.yandex.practicum.collector.builders.hub;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.springframework.beans.factory.annotation.Value;
 import ru.yandex.practicum.collector.producer.CollectorKafkaProducer;
-import ru.yandex.practicum.collector.schemas.hub.BaseHubEvent;
 import lombok.RequiredArgsConstructor;
+import ru.yandex.practicum.grpc.telemetry.event.HubEventProto;
 import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
+
+import java.time.Instant;
 
 @RequiredArgsConstructor
 public abstract class BaseHubBuilder<T extends SpecificRecordBase> implements HubEventBuilder {
@@ -14,21 +16,22 @@ public abstract class BaseHubBuilder<T extends SpecificRecordBase> implements Hu
     @Value("${kafka.topics.hub}")
     private String topic;
 
-    public abstract T toAvro(BaseHubEvent hubEvent);
+    public abstract T toAvro(HubEventProto hubEvent);
 
     @Override
-    public void builder(BaseHubEvent event) {
+    public void builder(HubEventProto event) {
         T payload = toAvro(event);
 
         HubEventAvro hubEventAvro = HubEventAvro.newBuilder()
                 .setHubId(event.getHubId())
-                .setTimestamp(event.getTimestamp())
+                .setTimestamp(Instant.ofEpochSecond(
+                        event.getTimestamp().getSeconds(), event.getTimestamp().getNanos()))
                 .setPayload(payload)
                 .build();
 
         producer.send(
                 topic,
-                event.getTimestamp(),
+                Instant.ofEpochSecond(event.getTimestamp().getSeconds(), event.getTimestamp().getNanos()),
                 event.getHubId(),
                 hubEventAvro
         );

@@ -1,17 +1,11 @@
 spring:
   application:
     name: aggregator
-kafka:
-  bootstrap-servers: localhost:9092
-  consumer:
-    client-id: SensorEventConsumer
-    group-id: sensorEvent.group.id
-    key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-    value-deserializer: deserializer.SensorEventDeserializer
-    enable-auto-commit: false
-  producer:
-    key-serializer: org.apache.kafka.common.serialization.StringSerializer
-    value-serializer: serializer.AvroSerializer
-  topics:
-    in: telemetry.sensors.v1
-    out: telemetry.snapshots.v1
+  config:
+    import: configserver:http://localhost:8888
+  cloud:
+    config:
+      fail-fast: true
+      retry:
+        useRandomPolicy: true
+        max-interval: 6000

@@ -4,13 +4,13 @@ spring:
       ddl-auto: none
     properties:
       hibernate:
-        format_sql: true
-    show_sql: true
+        "format_sql": true
+    show-sql: true
   cloud:
     openfeign:
       circuitbreaker:
         enabled: true
-        alphanumeric-ids:
+        "alphanumeric-ids":
           enabled: true
 
   sql:
@@ -26,7 +26,7 @@ spring:
 resilience4j:
   circuitbreaker:
     instances:
-      WarehouseClientcheckProductsQuantity:
+      WarehouseClientcheckProductQuantityForCart:
         slidingWindowSize: 10
         failureRateThreshold: 50
         waitDurationInOpenState: 10000

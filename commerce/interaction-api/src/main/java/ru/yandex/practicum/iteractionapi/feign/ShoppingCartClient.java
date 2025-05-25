@@ -1,4 +1,4 @@
-package ru.yandex.practicum.iteractionapi.feignClient;
+package ru.yandex.practicum.iteractionapi.feign;
 
 import jakarta.validation.Valid;
 import org.springframework.cloud.openfeign.FeignClient;

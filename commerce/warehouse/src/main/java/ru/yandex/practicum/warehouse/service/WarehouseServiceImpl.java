@@ -9,7 +9,7 @@ import ru.yandex.practicum.iteractionapi.dto.AddressDto;
 import ru.yandex.practicum.iteractionapi.dto.BookedProductsDto;
 import ru.yandex.practicum.iteractionapi.dto.ShoppingCartDto;
 import ru.yandex.practicum.iteractionapi.enums.QuantityState;
-import ru.yandex.practicum.iteractionapi.feignClient.ShoppingStoreClient;
+import ru.yandex.practicum.iteractionapi.feign.ShoppingStoreClient;
 import ru.yandex.practicum.iteractionapi.request.AddProductToWarehouseRequest;
 import ru.yandex.practicum.iteractionapi.request.NewProductInWarehouseRequest;
 import ru.yandex.practicum.warehouse.address.Address;

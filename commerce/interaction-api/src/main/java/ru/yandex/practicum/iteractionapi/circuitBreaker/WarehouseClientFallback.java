@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.iteractionapi.dto.AddressDto;
 import ru.yandex.practicum.iteractionapi.dto.BookedProductsDto;
 import ru.yandex.practicum.iteractionapi.dto.ShoppingCartDto;
-import ru.yandex.practicum.iteractionapi.feignClient.WarehouseClient;
+import ru.yandex.practicum.iteractionapi.feign.WarehouseClient;
 import ru.yandex.practicum.iteractionapi.request.AddProductToWarehouseRequest;
 import ru.yandex.practicum.iteractionapi.request.NewProductInWarehouseRequest;
 

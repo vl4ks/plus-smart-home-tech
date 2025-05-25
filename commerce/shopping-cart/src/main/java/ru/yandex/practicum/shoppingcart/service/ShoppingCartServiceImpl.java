@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.iteractionapi.dto.BookedProductsDto;
 import ru.yandex.practicum.iteractionapi.dto.ShoppingCartDto;
-import ru.yandex.practicum.iteractionapi.feignClient.WarehouseClient;
+import ru.yandex.practicum.iteractionapi.feign.WarehouseClient;
 import ru.yandex.practicum.iteractionapi.request.ChangeProductQuantityRequest;
 import ru.yandex.practicum.shoppingcart.exception.NoProductsInShoppingCartException;
 import ru.yandex.practicum.shoppingcart.exception.NotAuthorizedUserException;

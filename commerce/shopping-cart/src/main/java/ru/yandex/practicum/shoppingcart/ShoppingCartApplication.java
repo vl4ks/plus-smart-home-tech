@@ -6,7 +6,10 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import ru.yandex.practicum.iteractionapi.feign.WarehouseClient;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {
+        "ru.yandex.practicum.shoppingcart",
+        "ru.yandex.practicum.iteractionapi"
+})
 @EnableDiscoveryClient
 @EnableFeignClients(clients = {WarehouseClient.class})
 public class ShoppingCartApplication {

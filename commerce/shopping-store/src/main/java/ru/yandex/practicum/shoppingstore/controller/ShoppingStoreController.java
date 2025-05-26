@@ -31,7 +31,7 @@ public class ShoppingStoreController {
     public List<ProductDto> findProductsByCategory(@RequestParam ProductCategory productCategory,
                                                    @Valid PageableDto pageableDto) {
         log.info("Получение списка товаров по типу в пагинированном виде.");
-        return shoppingStoreService.findProductsByCategory(productCategory, pageableDto);
+        return shoppingStoreService.findProductsByProductCategory(productCategory, pageableDto);
     }
 
     @PutMapping

@@ -11,7 +11,7 @@ import java.util.UUID;
 public interface ShoppingStoreService {
     ProductDto findProductById(UUID productId);
 
-    List<ProductDto> findProductsByCategory(ProductCategory productCategory, PageableDto pageableDto);
+    List<ProductDto> findProductsByProductCategory(ProductCategory productCategory, PageableDto pageableDto);
 
     ProductDto createProduct(ProductDto productDto);
 

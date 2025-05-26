@@ -47,6 +47,9 @@ public class WarehouseServiceImpl implements WarehouseService {
             throw new SpecifiedProductAlreadyInWarehouseException(errorMessage);
         });
         Warehouse warehouse = warehouseMapper.toWarehouse(request);
+        if (warehouse.getQuantity() == null) {
+            warehouse.setQuantity(0);
+        }
         Warehouse savedWarehouse = warehouseRepository.save(warehouse);
         log.info("Товар успешно добавлен на склад. id: {}, Количество: {}",
                 savedWarehouse.getProductId(),
@@ -66,7 +69,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                     return new NoSpecifiedProductInWarehouseException(errorMessage);
                 });
 
-        long oldQuantity = warehouse.getQuantity();
+        Integer oldQuantity = warehouse.getQuantity();
         warehouse.setQuantity(oldQuantity + addProductToWarehouseRequest.getQuantity());
         warehouseRepository.save(warehouse);
 
@@ -146,7 +149,7 @@ public class WarehouseServiceImpl implements WarehouseService {
     private void syncProductStoreStatus(Warehouse warehouseProduct) {
         UUID productId = warehouseProduct.getProductId();
         QuantityState quantityState;
-        Long quantity = warehouseProduct.getQuantity();
+        Integer quantity = warehouseProduct.getQuantity();
 
         if (quantity == 0) {
             quantityState = QuantityState.ENDED;

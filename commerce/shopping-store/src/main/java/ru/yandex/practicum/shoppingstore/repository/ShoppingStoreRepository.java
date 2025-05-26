@@ -6,11 +6,8 @@ import ru.yandex.practicum.iteractionapi.enums.ProductCategory;
 import ru.yandex.practicum.shoppingstore.model.Product;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 public interface ShoppingStoreRepository extends JpaRepository<Product, UUID> {
     List<Product> findAllByProductCategory(ProductCategory productCategory, Pageable pageable);
-
-    Optional<Product> findByProductId(UUID productId);
 }

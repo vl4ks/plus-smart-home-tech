@@ -34,7 +34,7 @@ public class ShoppingStoreServiceImpl implements ShoppingStoreService {
     public ProductDto findProductById(UUID productId) {
         log.info("Запрос товара c id =: {}", productId);
 
-        Product product = shoppingStoreRepository.findByProductId(productId).orElseThrow(
+        Product product = shoppingStoreRepository.findById(productId).orElseThrow(
                 () -> new ProductNotFoundException(String.format("Товар c id =: %s в БД не найден", productId))
         );
 
@@ -43,7 +43,7 @@ public class ShoppingStoreServiceImpl implements ShoppingStoreService {
     }
 
     @Transactional(readOnly = true)
-    public List<ProductDto> findProductsByCategory(ProductCategory productCategory, PageableDto pageableDto) {
+    public List<ProductDto> findProductsByProductCategory(ProductCategory productCategory, PageableDto pageableDto) {
         log.info("Запрос списка товаров.");
 
         Pageable pageRequest = PageRequest.of(
@@ -79,7 +79,7 @@ public class ShoppingStoreServiceImpl implements ShoppingStoreService {
     @Override
     public ProductDto updateProduct(ProductDto productDto) {
         log.info("Попытка обновить продукт с id = : {}", productDto.getProductId());
-        Product oldProduct = shoppingStoreRepository.findByProductId(productDto.getProductId())
+        Product oldProduct = shoppingStoreRepository.findById(productDto.getProductId())
                 .orElseThrow(() -> new ProductNotFoundException(
                         String.format("Товар c id =: %s в БД не найден", productDto.getProductId()))
                 );
@@ -94,7 +94,7 @@ public class ShoppingStoreServiceImpl implements ShoppingStoreService {
     public boolean deleteProduct(UUID productId) {
         log.info("Запрос на удаление товара с id = : {}", productId);
 
-        Product product = shoppingStoreRepository.findByProductId(productId)
+        Product product = shoppingStoreRepository.findById(productId)
                 .orElseThrow(() -> {
                     String errorMessage = String.format("Товар c id =: %s в БД не найден", productId);
                     log.error(errorMessage);
@@ -112,11 +112,12 @@ public class ShoppingStoreServiceImpl implements ShoppingStoreService {
                 request.getProductId(),
                 request.getQuantityState());
 
-        Product product = shoppingStoreRepository.findByProductId(request.getProductId())
+        Product product = shoppingStoreRepository.findById(request.getProductId())
                 .orElseThrow(
                         () -> new ProductNotFoundException(String.format("Товар c id =: %s в БД не найден", request.getProductId()))
                 );
         product.setQuantityState(request.getQuantityState());
+        shoppingStoreRepository.save(product);
 
         log.info("Статус товара обновлён: id = {}, Статус: {}",
                 product.getProductId(),

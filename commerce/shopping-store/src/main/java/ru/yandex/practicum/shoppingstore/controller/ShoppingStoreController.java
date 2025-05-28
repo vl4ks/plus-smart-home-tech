@@ -4,14 +4,16 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.iteractionapi.dto.PageableDto;
 import ru.yandex.practicum.iteractionapi.dto.ProductDto;
-import ru.yandex.practicum.iteractionapi.enums.ProductCategory;
+import ru.yandex.practicum.iteractionapi.enums.QuantityState;
 import ru.yandex.practicum.iteractionapi.request.SetProductQuantityStateRequest;
 import ru.yandex.practicum.shoppingstore.service.ShoppingStoreService;
 
-import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -28,10 +30,13 @@ public class ShoppingStoreController {
     }
 
     @GetMapping
-    public List<ProductDto> findProductsByCategory(@RequestParam ProductCategory productCategory,
-                                                   @Valid PageableDto pageableDto) {
+    public Page<ProductDto> findProductsByCategory(@RequestParam String category,
+                                                   @RequestParam(defaultValue = "0") Integer page,
+                                                   @RequestParam(defaultValue = "1") Integer size,
+                                                   @RequestParam(defaultValue = "productName") String sort) {
         log.info("Получение списка товаров по типу в пагинированном виде.");
-        return shoppingStoreService.findProductsByProductCategory(productCategory, pageableDto);
+        Pageable pageable = PageRequest.of(page, size, Sort.Direction.ASC, sort);
+        return shoppingStoreService.findProductsByProductCategory(category, pageable);
     }
 
     @PutMapping
@@ -53,8 +58,13 @@ public class ShoppingStoreController {
     }
 
     @PostMapping("/quantityState")
-    public Boolean setProductQuantityState(@Valid SetProductQuantityStateRequest setProductQuantityStateRequest) {
-        log.info("Установка статуса по товару {}", setProductQuantityStateRequest);
-        return shoppingStoreService.setProductQuantityState(setProductQuantityStateRequest);
+    public Boolean setProductQuantityState(UUID productId, QuantityState quantityState) {
+        SetProductQuantityStateRequest request = SetProductQuantityStateRequest.builder()
+                .productId(productId)
+                .quantityState(quantityState)
+                .build();
+
+        log.info("Установка статуса товару {}", request);
+        return shoppingStoreService.setProductQuantityState(request);
     }
 }

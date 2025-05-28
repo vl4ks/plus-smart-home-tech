@@ -4,11 +4,11 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.iteractionapi.dto.BookedProductsDto;
 import ru.yandex.practicum.iteractionapi.dto.ShoppingCartDto;
 import ru.yandex.practicum.iteractionapi.request.ChangeProductQuantityRequest;
 import ru.yandex.practicum.shoppingcart.service.ShoppingCartService;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -20,9 +20,9 @@ public class ShoppingCartController {
     private final ShoppingCartService shoppingCartService;
 
     @GetMapping
-    public ShoppingCartDto findShoppingCartByUser(@RequestParam String username) {
+    public ShoppingCartDto findCart(@RequestParam String username) {
         log.info("Получение актуальной корзины для авторизованного пользователя. {}", username);
-        return shoppingCartService.findShoppingCartByUser(username);
+        return shoppingCartService.findCart(username);
     }
 
     @PutMapping
@@ -40,9 +40,9 @@ public class ShoppingCartController {
 
     @PostMapping("/remove")
     public ShoppingCartDto deleteProductsFromShoppingCart(@RequestParam String username,
-                                                          @RequestBody Map<UUID, Long> request) {
+                                                          @RequestBody List<UUID> products) {
         log.info("Изменение состава товаров в корзине {}", username);
-        return shoppingCartService.deleteProductsFromShoppingCart(username, request);
+        return shoppingCartService.deleteProductsFromShoppingCart(username, products);
     }
 
     @PostMapping("/change-quantity")
@@ -50,11 +50,5 @@ public class ShoppingCartController {
                                                  @RequestBody @Valid ChangeProductQuantityRequest requestDto) {
         log.info("Изменение количества товаров в корзине. {}", username);
         return shoppingCartService.updateProductQuantity(username, requestDto);
-    }
-
-    @PostMapping("/booking")
-    public BookedProductsDto bookingCartProducts(@RequestParam String username) {
-        log.info("Бронирование корзины покупок для пользователя {}", username);
-        return shoppingCartService.bookingCartProducts(username);
     }
 }

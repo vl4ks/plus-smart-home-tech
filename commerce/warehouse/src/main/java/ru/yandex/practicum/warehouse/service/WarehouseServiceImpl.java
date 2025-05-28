@@ -8,8 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.iteractionapi.dto.AddressDto;
 import ru.yandex.practicum.iteractionapi.dto.BookedProductsDto;
 import ru.yandex.practicum.iteractionapi.dto.ShoppingCartDto;
-import ru.yandex.practicum.iteractionapi.enums.QuantityState;
-import ru.yandex.practicum.iteractionapi.feign.ShoppingStoreClient;
 import ru.yandex.practicum.iteractionapi.request.AddProductToWarehouseRequest;
 import ru.yandex.practicum.iteractionapi.request.NewProductInWarehouseRequest;
 import ru.yandex.practicum.warehouse.address.Address;
@@ -35,7 +33,6 @@ import java.util.stream.Collectors;
 public class WarehouseServiceImpl implements WarehouseService {
     private final WarehouseRepository warehouseRepository;
     private final WarehouseMapper warehouseMapper;
-    private final ShoppingStoreClient shoppingStoreClient;
 
     @Override
     public void addNewProductToWarehouse(NewProductInWarehouseRequest request) {
@@ -56,29 +53,20 @@ public class WarehouseServiceImpl implements WarehouseService {
                 savedWarehouse.getQuantity());
     }
 
+
     @Override
-    public void addProductToWarehouse(AddProductToWarehouseRequest addProductToWarehouseRequest) {
+    public void addProductToWarehouse(AddProductToWarehouseRequest request) {
         log.info("Добавление товара на склад. id товара: {}, Количество: {}",
-                addProductToWarehouseRequest.getProductId(),
-                addProductToWarehouseRequest.getQuantity());
+                request.getProductId(),
+                request.getQuantity());
+        Warehouse product = warehouseRepository.findById(request.getProductId())
+                .orElseThrow(() -> new NoSpecifiedProductInWarehouseException("Товар c id =" +
+                        request.getProductId() + " не найден на складе."));
 
-        Warehouse warehouse = warehouseRepository.findById(addProductToWarehouseRequest.getProductId())
-                .orElseThrow(() -> {
-                    String errorMessage = "Товар c id =" + addProductToWarehouseRequest.getProductId() + " не найден на складе";
-                    log.error(errorMessage);
-                    return new NoSpecifiedProductInWarehouseException(errorMessage);
-                });
+        product.setQuantity(product.getQuantity() + request.getQuantity());
 
-        Integer oldQuantity = warehouse.getQuantity();
-        warehouse.setQuantity(oldQuantity + addProductToWarehouseRequest.getQuantity());
-        warehouseRepository.save(warehouse);
+        warehouseRepository.save(product);
 
-        log.info("Количество товара обновлено. id = : {}, Было: {}, Стало: {}",
-                warehouse.getProductId(),
-                oldQuantity,
-                warehouse.getQuantity());
-
-        syncProductStoreStatus(warehouse);
     }
 
     public BookedProductsDto checkProductQuantityForCart(ShoppingCartDto shoppingCartDto) {
@@ -145,22 +133,4 @@ public class WarehouseServiceImpl implements WarehouseService {
                         .sum())
                 .build();
     }
-
-    private void syncProductStoreStatus(Warehouse warehouseProduct) {
-        UUID productId = warehouseProduct.getProductId();
-        QuantityState quantityState;
-        Integer quantity = warehouseProduct.getQuantity();
-
-        if (quantity == 0) {
-            quantityState = QuantityState.ENDED;
-        } else if (quantity < 10) {
-            quantityState = QuantityState.ENOUGH;
-        } else if (quantity < 100) {
-            quantityState = QuantityState.FEW;
-        } else {
-            quantityState = QuantityState.MANY;
-        }
-        shoppingStoreClient.setProductQuantityState(productId, quantityState);
-    }
-
 }

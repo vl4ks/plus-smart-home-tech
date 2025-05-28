@@ -2,13 +2,10 @@ package ru.yandex.practicum.shoppingstore.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
-import ru.yandex.practicum.iteractionapi.dto.PageableDto;
 import ru.yandex.practicum.iteractionapi.dto.ProductDto;
 import ru.yandex.practicum.iteractionapi.enums.ProductCategory;
 import ru.yandex.practicum.iteractionapi.enums.ProductState;
@@ -18,8 +15,6 @@ import ru.yandex.practicum.shoppingstore.mapper.ProductMapper;
 import ru.yandex.practicum.shoppingstore.model.Product;
 import ru.yandex.practicum.shoppingstore.repository.ShoppingStoreRepository;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -42,24 +37,11 @@ public class ShoppingStoreServiceImpl implements ShoppingStoreService {
         return productMapper.productToProductDto(product);
     }
 
-    @Transactional(readOnly = true)
-    public List<ProductDto> findProductsByProductCategory(ProductCategory productCategory, PageableDto pageableDto) {
+    @Override
+    public Page<ProductDto> findProductsByProductCategory(String category, Pageable pageable) {
         log.info("Запрос списка товаров.");
-
-        Pageable pageRequest = PageRequest.of(
-                pageableDto.getPage(),
-                pageableDto.getSize(),
-                Sort.by(Sort.DEFAULT_DIRECTION, String.join(",", pageableDto.getSort()))
-        );
-
-        List<Product> products = shoppingStoreRepository.findAllByProductCategory(productCategory, pageRequest);
-        if (CollectionUtils.isEmpty(products)) {
-            log.warn("Товары не найдены для категории: {}", productCategory);
-            return Collections.emptyList();
-        }
-
-        log.debug("Найдено товаров: {}", products.size());
-        return productMapper.productsToProductsDto(products);
+        return shoppingStoreRepository.findAllByProductCategory(ProductCategory.valueOf(category), pageable)
+                .map(ProductMapper.INSTANCE::productToProductDto);
     }
 
     @Override
@@ -91,7 +73,7 @@ public class ShoppingStoreServiceImpl implements ShoppingStoreService {
     }
 
     @Override
-    public boolean deleteProduct(UUID productId) {
+    public Boolean deleteProduct(UUID productId) {
         log.info("Запрос на удаление товара с id = : {}", productId);
 
         Product product = shoppingStoreRepository.findById(productId)
@@ -107,7 +89,7 @@ public class ShoppingStoreServiceImpl implements ShoppingStoreService {
     }
 
     @Override
-    public boolean setProductQuantityState(SetProductQuantityStateRequest request) {
+    public Boolean setProductQuantityState(SetProductQuantityStateRequest request) {
         log.info("Изменение статуса товара c id = : {}, Новый статус: {}",
                 request.getProductId(),
                 request.getQuantityState());

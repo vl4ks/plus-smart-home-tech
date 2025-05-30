@@ -1,12 +1,15 @@
 package ru.yandex.practicum.iteractionapi.error;
 
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.experimental.FieldDefaults;
 
 import java.util.List;
 
 @Builder
 @Getter
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ErrorResponse {
     Throwable cause;
     List<StackTraceElement> stackTrace;

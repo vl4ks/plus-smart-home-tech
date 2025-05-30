@@ -1,11 +1,14 @@
 package ru.yandex.practicum.iteractionapi.dto;
 
 import jakarta.validation.constraints.Min;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.experimental.FieldDefaults;
 
 @Data
 @AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class DimensionDto {
     @Min(1)
     Double width;

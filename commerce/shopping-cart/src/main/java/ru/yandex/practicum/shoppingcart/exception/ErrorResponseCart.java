@@ -1,5 +1,6 @@
 package ru.yandex.practicum.shoppingcart.exception;
 
+import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -19,13 +20,9 @@ public class ErrorResponseCart {
     public ErrorResponse handleCommonException(RuntimeException e) {
         log.error("500 {}", e.getMessage());
         return ErrorResponse.builder()
-                .cause(e.getCause())
-                .stackTrace(Arrays.asList(e.getStackTrace()))
                 .httpStatus(HttpStatus.INTERNAL_SERVER_ERROR.name())
                 .userMessage(e.getMessage())
                 .message("Internal Server Error")
-                .suppressed(Arrays.asList(e.getSuppressed()))
-                .localizedMessage(e.getLocalizedMessage())
                 .build();
     }
 
@@ -35,13 +32,9 @@ public class ErrorResponseCart {
     public ErrorResponse handleBadRequestException(RuntimeException e) {
         log.error("400 {}", e.getMessage());
         return ErrorResponse.builder()
-                .cause(e.getCause())
-                .stackTrace(Arrays.asList(e.getStackTrace()))
                 .httpStatus(HttpStatus.BAD_REQUEST.name())
                 .userMessage(e.getMessage())
                 .message("Bad request")
-                .suppressed(Arrays.asList(e.getSuppressed()))
-                .localizedMessage(e.getLocalizedMessage())
                 .build();
     }
 
@@ -50,13 +43,9 @@ public class ErrorResponseCart {
     public ErrorResponse handleUnauthorizedException(NotAuthorizedUserException e) {
         log.error("401 {}", e.getMessage());
         return ErrorResponse.builder()
-                .cause(e.getCause())
-                .stackTrace(Arrays.asList(e.getStackTrace()))
                 .httpStatus(HttpStatus.UNAUTHORIZED.name())
                 .userMessage(e.getMessage())
                 .message("Not Authorized")
-                .suppressed(Arrays.asList(e.getSuppressed()))
-                .localizedMessage(e.getLocalizedMessage())
                 .build();
     }
 
@@ -66,13 +55,22 @@ public class ErrorResponseCart {
     public ErrorResponse handleNotFoundException(RuntimeException e) {
         log.error("404 {}", e.getMessage());
         return ErrorResponse.builder()
-                .cause(e.getCause())
-                .stackTrace(Arrays.asList(e.getStackTrace()))
                 .httpStatus(HttpStatus.NOT_FOUND.name())
                 .userMessage(e.getMessage())
                 .message("Not Found")
-                .suppressed(Arrays.asList(e.getSuppressed()))
-                .localizedMessage(e.getLocalizedMessage())
                 .build();
     }
+
+    @ExceptionHandler(FeignException.class)
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    public ErrorResponse handleFeignException(FeignException e) {
+        log.error("Ошибка при вызове сервиса: {}", e.getMessage());
+
+        return ErrorResponse.builder()
+                .httpStatus(HttpStatus.SERVICE_UNAVAILABLE.name())
+                .userMessage(e.getMessage())
+                .message("Сервис склада временно недоступен")
+                .build();
+    }
+
 }

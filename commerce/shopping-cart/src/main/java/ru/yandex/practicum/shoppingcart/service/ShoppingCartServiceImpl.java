@@ -1,10 +1,13 @@
 package ru.yandex.practicum.shoppingcart.service;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.yandex.practicum.iteractionapi.dto.BookedProductsDto;
 import ru.yandex.practicum.iteractionapi.dto.ShoppingCartDto;
+import ru.yandex.practicum.iteractionapi.feign.WarehouseClient;
 import ru.yandex.practicum.iteractionapi.request.ChangeProductQuantityRequest;
 import ru.yandex.practicum.shoppingcart.exception.NoProductsInShoppingCartException;
 import ru.yandex.practicum.shoppingcart.exception.NotAuthorizedUserException;
@@ -24,6 +27,7 @@ import java.util.UUID;
 public class ShoppingCartServiceImpl implements ShoppingCartService {
     private final ShoppingCartRepository shoppingCartRepository;
     private final ShoppingCartMapper shoppingCartMapper;
+    private final WarehouseClient warehouseClient;
 
     @Override
     public ShoppingCartDto findCart(String username) {
@@ -62,6 +66,9 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         log.info("Добавление товаров в корзину. Пользователь: {}, Кол-во товаров: {}", username, request.size());
 
         checkUsername(username);
+
+        checkProductAvailability(request);
+
         ShoppingCart shoppingCart = ShoppingCart.builder()
                 .username(username)
                 .products(request)
@@ -89,7 +96,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
         ShoppingCart shoppingCart = findShoppingCartByUser(username);
         if (!shoppingCart.getProducts().keySet().containsAll(products)) {
-            throw new NoProductsInShoppingCartException("Products not found in cart");
+            throw new NoProductsInShoppingCartException("Товар не найден в корзине");
         }
         products.forEach(shoppingCart.getProducts()::remove);
 
@@ -108,7 +115,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         ShoppingCart cart = findShoppingCartByUser(username);
 
         if (!cart.getProducts().containsKey(requestDto.getProductId())) {
-            throw new NoProductsInShoppingCartException("Product not found in cart");
+            throw new NoProductsInShoppingCartException("Товар не найден в корзине");
         }
 
         cart.getProducts().put(requestDto.getProductId(), requestDto.getNewQuantity());
@@ -121,6 +128,21 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     private void checkUsername(String username) {
         if (username == null || username.isEmpty()) {
             throw new NotAuthorizedUserException("Имя пользователя должно быть заполнено.");
+        }
+    }
+
+    private void checkProductAvailability(Map<UUID, Long> products) {
+        ShoppingCartDto cartDto = ShoppingCartDto.builder()
+                .shoppingCartId(UUID.randomUUID())
+                .products(products)
+                .build();
+
+        try {
+            BookedProductsDto response = warehouseClient.checkProductQuantityForCart(cartDto);
+            log.debug("Проверка наличия товаров завершена. Ответ склада: {}", response);
+        } catch (FeignException e) {
+            log.error("Ошибка при проверке наличия товаров: {}", e.getMessage());
+            throw new IllegalStateException("Сервис склада недоступен. Попробуйте позже.");
         }
     }
 }

@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.yandex.practicum.iteractionapi.error.ErrorResponse;
 
-import java.util.Arrays;
 
 @Slf4j
 @RestControllerAdvice
@@ -19,13 +18,9 @@ public class ErrorResponseWarehouse {
     public ErrorResponse handleCommonException(RuntimeException e) {
         log.error("500 {}", e.getMessage());
         return ErrorResponse.builder()
-                .cause(e.getCause())
-                .stackTrace(Arrays.asList(e.getStackTrace()))
                 .httpStatus(HttpStatus.INTERNAL_SERVER_ERROR.name())
                 .userMessage(e.getMessage())
                 .message("Internal Server Error")
-                .suppressed(Arrays.asList(e.getSuppressed()))
-                .localizedMessage(e.getLocalizedMessage())
                 .build();
     }
 
@@ -38,13 +33,9 @@ public class ErrorResponseWarehouse {
     public ErrorResponse handleBadRequestException(RuntimeException e) {
         log.error("400 {}", e.getMessage());
         return ErrorResponse.builder()
-                .cause(e.getCause())
-                .stackTrace(Arrays.asList(e.getStackTrace()))
                 .httpStatus(HttpStatus.BAD_REQUEST.name())
                 .userMessage(e.getMessage())
                 .message("Bad request")
-                .suppressed(Arrays.asList(e.getSuppressed()))
-                .localizedMessage(e.getLocalizedMessage())
                 .build();
     }
 
@@ -53,13 +44,9 @@ public class ErrorResponseWarehouse {
     public ErrorResponse handleProductNotFoundException(ProductNotFoundInWarehouseException e) {
         log.error("404 {}", e.getMessage());
         return ErrorResponse.builder()
-                .cause(e.getCause())
-                .stackTrace(Arrays.asList(e.getStackTrace()))
                 .httpStatus(HttpStatus.NOT_FOUND.name())
                 .userMessage(e.getMessage())
                 .message("Not Found")
-                .suppressed(Arrays.asList(e.getSuppressed()))
-                .localizedMessage(e.getLocalizedMessage())
                 .build();
     }
 }

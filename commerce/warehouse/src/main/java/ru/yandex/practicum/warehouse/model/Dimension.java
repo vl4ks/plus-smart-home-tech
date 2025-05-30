@@ -2,6 +2,7 @@ package ru.yandex.practicum.warehouse.model;
 
 import jakarta.persistence.Embeddable;
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Getter
 @Setter
@@ -9,6 +10,7 @@ import lombok.*;
 @Embeddable
 @AllArgsConstructor
 @NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Dimension {
     Double width;
     Double height;

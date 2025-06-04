@@ -15,7 +15,7 @@
         <kafka-clients.version>3.4.0</kafka-clients.version>
         <lombok.version>1.18.30</lombok.version>
         <postgresql.version>42.6.0</postgresql.version>
-        <grpc-client-spring-boot-starter.version>3.0.0.RELEASE</grpc-client-spring-boot-starter.version>
+        <grpc-client-spring-boot-starter.version>2.15.0.RELEASE</grpc-client-spring-boot-starter.version>
 
         <avro-schemas.version>${project.version}</avro-schemas.version>
         <proto-schemas.version>${project.version}</proto-schemas.version>

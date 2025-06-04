@@ -14,6 +14,7 @@
     <properties>
         <lombok.version>1.18.30</lombok.version>
         <jakarta.validation-api.version>3.0.2</jakarta.validation-api.version>
+        <jakarta.annotation-api.version>2.1.1</jakarta.annotation-api.version>
 
         <avro-schemas.version>${project.version}</avro-schemas.version>
         <proto-schemas.version>${project.version}</proto-schemas.version>
@@ -63,6 +64,11 @@
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
             <version>${jakarta.validation-api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+            <version>${jakarta.annotation-api.version}</version>
         </dependency>
 
         <dependency>

@@ -21,15 +21,23 @@ public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     UUID productId;
+
     String productName;
+
     String description;
+
     String imageSrc;
+
     @Enumerated(EnumType.STRING)
     QuantityState quantityState;
+
     @Enumerated(EnumType.STRING)
     ProductState productState;
+
     @Enumerated(EnumType.STRING)
     ProductCategory productCategory;
+
     double price;
+
     int rating;
 }

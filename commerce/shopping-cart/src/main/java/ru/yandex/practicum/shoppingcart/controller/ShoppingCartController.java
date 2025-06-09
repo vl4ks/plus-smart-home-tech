@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.iteractionapi.dto.BookedProductsDto;
 import ru.yandex.practicum.iteractionapi.dto.ShoppingCartDto;
 import ru.yandex.practicum.iteractionapi.request.ChangeProductQuantityRequest;
 import ru.yandex.practicum.shoppingcart.service.ShoppingCartService;
@@ -50,5 +51,11 @@ public class ShoppingCartController {
                                                  @RequestBody @Valid ChangeProductQuantityRequest requestDto) {
         log.info("Изменение количества товаров в корзине. {}", username);
         return shoppingCartService.updateProductQuantity(username, requestDto);
+    }
+
+    @PostMapping("/booking")
+    public BookedProductsDto bookingProductsForUser(@RequestParam String username) {
+        log.info("Бронирование корзины покупок для пользователя {}", username);
+        return shoppingCartService.bookingProductsForUser(username);
     }
 }

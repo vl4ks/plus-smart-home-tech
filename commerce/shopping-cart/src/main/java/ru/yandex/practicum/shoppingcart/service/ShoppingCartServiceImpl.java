@@ -125,6 +125,13 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         return ShoppingCartMapper.INSTANCE.toShoppingCartDto(cart);
     }
 
+    @Override
+    public BookedProductsDto bookingProductsForUser(String username) {
+        checkUsername(username);
+        ShoppingCart shoppingCart = findShoppingCartByUser(username);
+        return warehouseClient.bookingCartProducts(shoppingCartMapper.toShoppingCartDto(shoppingCart));
+    }
+
     private void checkUsername(String username) {
         if (username == null || username.isEmpty()) {
             throw new NotAuthorizedUserException("Имя пользователя должно быть заполнено.");

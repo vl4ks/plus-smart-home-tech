@@ -11,6 +11,7 @@ spring:
             - Path=/shopping-cart/**
           filters:
             - CircuitBreaker=myCircuitBreaker
+            - PrefixPath=/api/v1
         - id: shopping_store_service_route
           uri: lb://shopping-store
           predicates:
@@ -25,3 +26,18 @@ spring:
             - PrefixPath=/api/v1
 server:
   port: 8080
+
+management:
+  endpoint:
+    gateway:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: gateway,health
+
+logging:
+  level:
+    org.springframework.cloud.gateway: TRACE
+    org.springframework.boot.actuate: TRACE
+    org.springframework.cloud.loadbalancer: DEBUG

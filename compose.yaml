@@ -40,6 +40,16 @@ services:
       - POSTGRES_USER=warehouse
       - POSTGRES_DB=warehouse-db
 
+  order-db:
+    image: postgres:16.1
+    container_name: order-db
+    ports:
+      - "2432:5432"
+    environment:
+      - POSTGRES_PASSWORD=order
+      - POSTGRES_USER=order
+      - POSTGRES_DB=order-db
+
   kafka:
     image: confluentinc/confluent-local:7.4.3
     hostname: kafka

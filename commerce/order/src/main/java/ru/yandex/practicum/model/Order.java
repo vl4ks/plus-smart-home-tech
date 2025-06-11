@@ -20,6 +20,7 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     UUID orderId;
+    String username;
     UUID shoppingCartId;
     @ElementCollection
     @CollectionTable(name = "order_items", joinColumns = @JoinColumn(name = "order_id"))

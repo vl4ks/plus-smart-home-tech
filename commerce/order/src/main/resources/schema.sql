@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS orders
 (
     order_id         UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    username         VARCHAR,
     shopping_cart_id UUID NOT NULL,
     payment_id       UUID,
     delivery_id      UUID,

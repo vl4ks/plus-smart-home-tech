@@ -29,7 +29,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
-    private final ShoppingCartClient shoppingCartClient;
     private final OrderMapper orderMapper;
     private final WarehouseClient warehouseClient;
     private final PaymentClient paymentClient;

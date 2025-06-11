@@ -50,6 +50,16 @@ services:
       - POSTGRES_USER=order
       - POSTGRES_DB=order-db
 
+  payment-db:
+    image: postgres:16.1
+    container_name: payment-db
+    ports:
+      - "3432:5432"
+    environment:
+      - POSTGRES_PASSWORD=payment
+      - POSTGRES_USER=payment
+      - POSTGRES_DB=payment-db
+
   kafka:
     image: confluentinc/confluent-local:7.4.3
     hostname: kafka

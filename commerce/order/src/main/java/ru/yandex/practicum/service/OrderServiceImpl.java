@@ -12,7 +12,6 @@ import ru.yandex.practicum.iteractionapi.enums.OrderState;
 import ru.yandex.practicum.iteractionapi.exception.NotAuthorizedUserException;
 import ru.yandex.practicum.iteractionapi.feign.DeliveryClient;
 import ru.yandex.practicum.iteractionapi.feign.PaymentClient;
-import ru.yandex.practicum.iteractionapi.feign.ShoppingCartClient;
 import ru.yandex.practicum.iteractionapi.feign.WarehouseClient;
 import ru.yandex.practicum.iteractionapi.request.AssemblyProductsForOrderRequest;
 import ru.yandex.practicum.iteractionapi.request.CreateNewOrderRequest;
@@ -73,12 +72,12 @@ public class OrderServiceImpl implements OrderService {
 
         DeliveryDto deliveryDto = DeliveryDto.builder()
                 .orderId(newOrder.getOrderId())
-                .fromAddress(warehouseClient.fetchWarehouseAddress())
+                .fromAddress(warehouseClient.getWarehouseAddress())
                 .toAddress(newOrderRequest.getDeliveryAddress())
                 .build();
         newOrder.setDeliveryId(deliveryClient.planDelivery(deliveryDto).getDeliveryId());
 
-        paymentClient.createPayment(orderMapper.toOrderDto(newOrder));
+        paymentClient.payment(orderMapper.toOrderDto(newOrder));
 
         log.info("Успешно создан новый заказ c id=: {}", newOrder.getOrderId());
         return orderMapper.toOrderDto(newOrder);

@@ -13,6 +13,7 @@ import ru.yandex.practicum.iteractionapi.dto.ShoppingCartDto;
 import ru.yandex.practicum.iteractionapi.request.AddProductToWarehouseRequest;
 import ru.yandex.practicum.iteractionapi.request.AssemblyProductsForOrderRequest;
 import ru.yandex.practicum.iteractionapi.request.NewProductInWarehouseRequest;
+import ru.yandex.practicum.iteractionapi.request.ShippedToDeliveryRequest;
 
 import java.util.Map;
 import java.util.UUID;
@@ -34,9 +35,9 @@ public interface WarehouseClient {
     @PostMapping("/assembly")
     BookedProductsDto assemblyProductForOrder(@RequestBody @Valid AssemblyProductsForOrderRequest assemblyProductsForOrder);
 
-    @GetMapping("/address")
-    AddressDto fetchWarehouseAddress();
+    @PostMapping("/shipped")
+    void shippedToDelivery(ShippedToDeliveryRequest deliveryRequest);
 
-    @PostMapping("/booking")
-    BookedProductsDto bookingCartProducts(@RequestBody @Valid ShoppingCartDto shoppingCartDto);
+    @GetMapping("/address")
+    AddressDto getWarehouseAddress();
 }

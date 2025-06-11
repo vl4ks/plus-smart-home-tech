@@ -21,9 +21,9 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     @PostMapping
-    public PaymentDto createPayment(@RequestBody @Valid OrderDto orderDto) {
+    public PaymentDto payment(@RequestBody @Valid OrderDto orderDto) {
         log.info("Формирование оплаты для заказа (переход в платежный шлюз): {}", orderDto);
-        return paymentService.createPayment(orderDto);
+        return paymentService.payment(orderDto);
     }
 
     @PostMapping("/totalCost")

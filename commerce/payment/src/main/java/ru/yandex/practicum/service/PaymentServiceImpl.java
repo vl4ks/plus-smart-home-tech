@@ -31,7 +31,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final String STRING_PAYMENT_NOT_FOUND = "Данная оплата не найдена.";
 
     @Override
-    public PaymentDto createPayment(OrderDto orderDto) {
+    public PaymentDto payment(OrderDto orderDto) {
         log.info("Формирование платежа для заказа {}", orderDto.getOrderId());
         checkOrder(orderDto);
         Payment payment = PaymentMapper.INSTANCE.newPayment(orderDto);

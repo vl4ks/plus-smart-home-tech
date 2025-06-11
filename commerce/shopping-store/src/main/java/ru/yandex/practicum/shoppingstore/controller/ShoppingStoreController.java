@@ -24,9 +24,9 @@ public class ShoppingStoreController {
     private final ShoppingStoreService shoppingStoreService;
 
     @GetMapping("/{productId}")
-    public ProductDto findProductById(@PathVariable @NotNull UUID productId) {
+    public ProductDto getProduct(@PathVariable @NotNull UUID productId) {
         log.info("Получение сведений по товару из БД: {}", productId);
-        return shoppingStoreService.findProductById(productId);
+        return shoppingStoreService.getProduct(productId);
     }
 
     @GetMapping

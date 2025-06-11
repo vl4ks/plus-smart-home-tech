@@ -8,13 +8,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.yandex.practicum.iteractionapi.error.ErrorResponse;
-import ru.yandex.practicum.iteractionapi.exception.NoSpecifiedProductInWarehouseException;
-import ru.yandex.practicum.iteractionapi.exception.NotAuthorizedUserException;
-
 
 @Slf4j
 @RestControllerAdvice
-public class ErrorResponseOrder {
+public class ErrorResponsePayment {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleCommonException(RuntimeException e) {
@@ -27,7 +24,7 @@ public class ErrorResponseOrder {
     }
 
     @ExceptionHandler({MissingServletRequestParameterException.class,
-            MethodArgumentNotValidException.class})
+            MethodArgumentNotValidException.class, NotEnoughInfoInOrderToCalculateException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleBadRequestException(RuntimeException e) {
         log.error("400 {}", e.getMessage());
@@ -39,20 +36,8 @@ public class ErrorResponseOrder {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ErrorResponse handleUnauthorizedException(NotAuthorizedUserException e) {
-        log.error("401 {}", e.getMessage());
-        return ErrorResponse.builder()
-                .httpStatus(HttpStatus.UNAUTHORIZED.name())
-                .userMessage(e.getMessage())
-                .message("Not Authorized")
-                .build();
-    }
-
-    @ExceptionHandler({NoSpecifiedProductInWarehouseException.class,
-            NoOrderFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleNotFoundException(RuntimeException e) {
+    public ErrorResponse handleNotFoundException(NoPaymentFoundException e) {
         log.error("404 {}", e.getMessage());
         return ErrorResponse.builder()
                 .httpStatus(HttpStatus.NOT_FOUND.name())

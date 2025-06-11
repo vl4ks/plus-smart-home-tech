@@ -8,6 +8,7 @@ import ru.yandex.practicum.iteractionapi.feign.WarehouseClient;
 import ru.yandex.practicum.iteractionapi.request.AddProductToWarehouseRequest;
 import ru.yandex.practicum.iteractionapi.request.AssemblyProductsForOrderRequest;
 import ru.yandex.practicum.iteractionapi.request.NewProductInWarehouseRequest;
+import ru.yandex.practicum.iteractionapi.request.ShippedToDeliveryRequest;
 
 import java.util.Map;
 import java.util.UUID;
@@ -31,12 +32,7 @@ public class WarehouseClientFallback implements WarehouseClient {
     }
 
     @Override
-    public AddressDto fetchWarehouseAddress() {
-        throw new WarehouseServerUnavailable("Fallback response: сервис временно недоступен.");
-    }
-
-    @Override
-    public BookedProductsDto bookingCartProducts(ShoppingCartDto shoppingCartDto) {
+    public AddressDto getWarehouseAddress() {
         throw new WarehouseServerUnavailable("Fallback response: сервис временно недоступен.");
     }
 
@@ -47,6 +43,11 @@ public class WarehouseClientFallback implements WarehouseClient {
 
     @Override
     public BookedProductsDto assemblyProductForOrder(AssemblyProductsForOrderRequest assemblyProductsForOrder) {
+        throw new WarehouseServerUnavailable("Fallback response: сервис временно недоступен.");
+    }
+
+    @Override
+    public void shippedToDelivery(ShippedToDeliveryRequest deliveryRequest) {
         throw new WarehouseServerUnavailable("Fallback response: сервис временно недоступен.");
     }
 }

@@ -6,7 +6,7 @@ import ru.yandex.practicum.iteractionapi.dto.PaymentDto;
 import java.util.UUID;
 
 public interface PaymentService {
-    PaymentDto createPayment(OrderDto orderDto);
+    PaymentDto payment(OrderDto orderDto);
 
     Double getTotalCost(OrderDto orderDto);
 

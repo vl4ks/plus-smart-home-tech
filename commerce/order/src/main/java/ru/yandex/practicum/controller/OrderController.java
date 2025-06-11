@@ -38,7 +38,7 @@ public class OrderController {
     }
 
     @PostMapping("/payment")
-    public OrderDto payment(@RequestBody UUID orderId) {
+    public OrderDto payment(UUID orderId) {
         log.info("Оплата заказа {}", orderId);
         return orderService.payment(orderId);
 
@@ -57,13 +57,13 @@ public class OrderController {
     }
 
     @PostMapping("/delivery/failed")
-    public OrderDto deliveryFailed(@RequestBody UUID orderId) {
+    public OrderDto deliveryFailed(UUID orderId) {
         log.info("Доставка заказа произошла с ошибкой {}", orderId);
         return orderService.deliveryFailed(orderId);
     }
 
     @PostMapping("/completed")
-    public OrderDto complete(@RequestBody UUID orderId) {
+    public OrderDto complete(UUID orderId) {
         log.info("Завершение заказа {}", orderId);
         return orderService.complete(orderId);
     }
@@ -75,19 +75,19 @@ public class OrderController {
     }
 
     @PostMapping("/calculate/delivery")
-    public OrderDto calculateDeliveryCost(@RequestBody UUID orderId) {
+    public OrderDto calculateDeliveryCost(UUID orderId) {
         log.info("Расчёт стоимости доставки заказа {}", orderId);
         return orderService.calculateDeliveryCost(orderId);
     }
 
     @PostMapping("/assembly")
-    public OrderDto assembly(@RequestBody UUID orderId) {
+    public OrderDto assembly(UUID orderId) {
         log.info("Сборка заказа {}", orderId);
         return orderService.assembly(orderId);
     }
 
     @PostMapping("/assembly/failed")
-    public OrderDto assemblyFailed(@RequestBody UUID orderId) {
+    public OrderDto assemblyFailed(UUID orderId) {
         log.info("Сборка заказа произошла с ошибкой {}", orderId);
         return orderService.assemblyFailed(orderId);
     }

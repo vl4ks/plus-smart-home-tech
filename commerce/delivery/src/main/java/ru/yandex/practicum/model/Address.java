@@ -15,6 +15,7 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Address {
     @Id
+    @Column(name = "address_id")
     @GeneratedValue(strategy = GenerationType.UUID)
     UUID addressId;
     String country;

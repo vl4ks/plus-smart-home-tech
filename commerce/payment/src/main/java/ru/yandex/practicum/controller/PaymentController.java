@@ -27,25 +27,25 @@ public class PaymentController {
     }
 
     @PostMapping("/totalCost")
-    public Double getTotalCost(@RequestBody @Valid OrderDto orderDto) {
+    public Double getTotalCost(OrderDto orderDto) {
         log.info("Расчёт полной стоимости заказа: {}", orderDto);
         return paymentService.getTotalCost(orderDto);
     }
 
     @PostMapping("/refund")
-    public void paymentSuccess(@RequestBody UUID orderId) {
+    public void paymentSuccess(UUID orderId) {
         log.info("Метод для эмуляции успешной оплаты в платежного шлюза: {}", orderId);
         paymentService.paymentSuccess(orderId);
     }
 
     @PostMapping("/productCost")
-    public Double productCost(@RequestBody @Valid OrderDto orderDto) {
+    public Double productCost(OrderDto orderDto) {
         log.info("Расчёт стоимости товаров в заказе: {}", orderDto);
         return paymentService.productCost(orderDto);
     }
 
     @PostMapping("/failed")
-    public void paymentFailed(@RequestBody UUID orderId) {
+    public void paymentFailed(UUID orderId) {
         log.info("Метод для эмуляции отказа в оплате платежного шлюза: {}", orderId);
         paymentService.paymentFailed(orderId);
     }

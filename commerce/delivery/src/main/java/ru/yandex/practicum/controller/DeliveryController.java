@@ -24,25 +24,25 @@ public class DeliveryController {
     }
 
     @PostMapping("/successful")
-    public void deliverySuccessful(@RequestBody UUID deliveryId) {
+    public void deliverySuccessful(UUID deliveryId) {
         log.info("Эмуляция успешной доставки товара {}", deliveryId);
         deliveryService.deliverySuccessful(deliveryId);
     }
 
     @PostMapping("/picked")
-    public void deliveryPicked(@RequestBody UUID deliveryId) {
+    public void deliveryPicked(UUID deliveryId) {
         log.info("Эмуляция получения товара в доставку {}", deliveryId);
         deliveryService.deliveryPicked(deliveryId);
     }
 
     @PostMapping("/failed")
-    public void deliveryFailed(@RequestBody UUID deliveryId) {
+    public void deliveryFailed(UUID deliveryId) {
         log.info("Эмуляция неудачного вручения товара {}", deliveryId);
         deliveryService.deliveryFailed(deliveryId);
     }
 
     @PostMapping("/cost")
-    public Double deliveryCost(@RequestBody @Valid OrderDto orderDto) {
+    public Double deliveryCost(OrderDto orderDto) {
         log.info("Расчёт полной стоимости доставки заказа {}", orderDto);
         return deliveryService.deliveryCost(orderDto);
     }

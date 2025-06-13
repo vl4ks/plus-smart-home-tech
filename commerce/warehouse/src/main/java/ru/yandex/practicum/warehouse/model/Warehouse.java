@@ -27,5 +27,5 @@ public class Warehouse {
     })
     Dimension dimension;
     Boolean fragile;
-    Integer quantity;
+    Long quantity;
 }

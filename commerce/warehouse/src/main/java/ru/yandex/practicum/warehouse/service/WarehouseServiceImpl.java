@@ -9,20 +9,22 @@ import ru.yandex.practicum.iteractionapi.dto.AddressDto;
 import ru.yandex.practicum.iteractionapi.dto.BookedProductsDto;
 import ru.yandex.practicum.iteractionapi.dto.ShoppingCartDto;
 import ru.yandex.practicum.iteractionapi.request.AddProductToWarehouseRequest;
+import ru.yandex.practicum.iteractionapi.request.AssemblyProductsForOrderRequest;
 import ru.yandex.practicum.iteractionapi.request.NewProductInWarehouseRequest;
+import ru.yandex.practicum.iteractionapi.request.ShippedToDeliveryRequest;
 import ru.yandex.practicum.warehouse.address.Address;
 import ru.yandex.practicum.warehouse.exception.NoSpecifiedProductInWarehouseException;
 import ru.yandex.practicum.warehouse.exception.ProductInShoppingCartLowQuantityInWarehouseException;
 import ru.yandex.practicum.warehouse.exception.ProductNotFoundInWarehouseException;
 import ru.yandex.practicum.warehouse.exception.SpecifiedProductAlreadyInWarehouseException;
+import ru.yandex.practicum.warehouse.mapper.OrderBookingMapper;
 import ru.yandex.practicum.warehouse.mapper.WarehouseMapper;
+import ru.yandex.practicum.warehouse.model.OrderBooking;
 import ru.yandex.practicum.warehouse.model.Warehouse;
+import ru.yandex.practicum.warehouse.repository.OrderBookingRepository;
 import ru.yandex.practicum.warehouse.repository.WarehouseRepository;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -33,6 +35,8 @@ import java.util.stream.Collectors;
 public class WarehouseServiceImpl implements WarehouseService {
     private final WarehouseRepository warehouseRepository;
     private final WarehouseMapper warehouseMapper;
+    private final OrderBookingRepository orderBookingRepository;
+    private final OrderBookingMapper orderBookingMapper;
 
     @Override
     public void addNewProductToWarehouse(NewProductInWarehouseRequest request) {
@@ -45,7 +49,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         });
         Warehouse warehouse = warehouseMapper.toWarehouse(request);
         if (warehouse.getQuantity() == null) {
-            warehouse.setQuantity(0);
+            warehouse.setQuantity(0L);
         }
         Warehouse savedWarehouse = warehouseRepository.save(warehouse);
         log.info("Товар успешно добавлен на склад. id: {}, Количество: {}",
@@ -105,7 +109,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     @Transactional(readOnly = true)
-    public AddressDto fetchWarehouseAddress() {
+    public AddressDto getWarehouseAddress() {
         log.info("Запрос адреса склада");
         String address = Address.CURRENT_ADDRESS;
         AddressDto addressDto = AddressDto.builder()
@@ -119,6 +123,70 @@ public class WarehouseServiceImpl implements WarehouseService {
         log.debug("Адрес: {}", addressDto);
         return addressDto;
     }
+
+    @Override
+    public void shippedToDelivery(ShippedToDeliveryRequest deliveryRequest) {
+        UUID orderId = deliveryRequest.getOrderId();
+        UUID deliveryId = deliveryRequest.getDeliveryId();
+
+        log.info("Отправка товаров заказа {} в доставку {}", orderId, deliveryId);
+
+        OrderBooking booking = orderBookingRepository.findByOrderId(orderId).orElseThrow(
+                () -> {
+                    log.error("Товары {} не найдены на складе", orderId);
+                    return new NoSpecifiedProductInWarehouseException("Отсутствует информации о товаре на складе.");
+                });
+
+        booking.setDeliveryId(deliveryRequest.getDeliveryId());
+
+        log.info("Товары заказа {} в доставке {}", orderId, deliveryId);
+    }
+
+    @Override
+    public void acceptReturn(Map<UUID, Long> products) {
+        log.info("Прием возврата {} товаров", products.size());
+
+        List<Warehouse> warehousesItems = warehouseRepository.findAllById(products.keySet());
+        log.debug("Найдено {} позиций на складе для возврата", warehousesItems.size());
+
+        for (Warehouse warehouse : warehousesItems) {
+            UUID productId = warehouse.getProductId();
+            Long returnQuantity = products.get(productId);
+            warehouse.setQuantity(warehouse.getQuantity() + returnQuantity);
+            log.debug("Возвращено {} единиц товара {}", returnQuantity, productId);
+        }
+        log.info("Возврат {} товаров успешно обработан", products.size());
+    }
+
+    @Override
+    public BookedProductsDto assemblyProductsForOrder(AssemblyProductsForOrderRequest assemblyProductsForOrder) {
+        UUID shoppingCartId = assemblyProductsForOrder.getShoppingCartId();
+        log.info("Начало сборки товаров для заказа из корзины {}", shoppingCartId);
+        OrderBooking booking = orderBookingRepository.findById(shoppingCartId).orElseThrow(
+                () -> {
+                    log.error("Корзина покупок {} не найдена", shoppingCartId);
+                    return new RuntimeException(String.format("Shopping cart %s not found", shoppingCartId));
+                });
+        log.debug("Найдена корзина покупок: {}", shoppingCartId);
+
+        Map<UUID, Long> productsInBooking = booking.getProducts();
+        List<Warehouse> productsInWarehouse = warehouseRepository.findAllById(productsInBooking.keySet());
+
+        log.info("Проверка наличия {} товаров на складе", productsInBooking.size());
+
+        productsInWarehouse.forEach(warehouse -> {
+            if (warehouse.getQuantity() < productsInBooking.get(warehouse.getProductId())) {
+                throw new ProductInShoppingCartLowQuantityInWarehouseException("Ошибка, нет необходимого количества товара на складе.");
+            }
+        });
+        for (Warehouse warehouse : productsInWarehouse) {
+            warehouse.setQuantity(warehouse.getQuantity() - productsInBooking.get(warehouse.getProductId()));
+        }
+        booking.setOrderId(assemblyProductsForOrder.getOrderId());
+        log.info("Товары успешно собраны для заказа {}", assemblyProductsForOrder.getOrderId());
+        return orderBookingMapper.toBookedProductsDto(booking);
+    }
+
 
     private BookedProductsDto calculateBookingDetails(Collection<Warehouse> productList,
                                                       Map<UUID, Long> cartProducts) {

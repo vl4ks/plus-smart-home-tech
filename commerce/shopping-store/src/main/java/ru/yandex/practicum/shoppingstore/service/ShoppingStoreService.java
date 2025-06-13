@@ -8,7 +8,7 @@ import ru.yandex.practicum.iteractionapi.request.SetProductQuantityStateRequest;
 import java.util.UUID;
 
 public interface ShoppingStoreService {
-    ProductDto findProductById(UUID productId);
+    ProductDto getProduct(UUID productId);
 
     Page<ProductDto> findProductsByProductCategory(String category, Pageable pageable);
 

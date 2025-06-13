@@ -52,10 +52,4 @@ public class ShoppingCartController {
         log.info("Изменение количества товаров в корзине. {}", username);
         return shoppingCartService.updateProductQuantity(username, requestDto);
     }
-
-    @PostMapping("/booking")
-    public BookedProductsDto bookingProductsForUser(@RequestParam String username) {
-        log.info("Бронирование корзины покупок для пользователя {}", username);
-        return shoppingCartService.bookingProductsForUser(username);
-    }
 }

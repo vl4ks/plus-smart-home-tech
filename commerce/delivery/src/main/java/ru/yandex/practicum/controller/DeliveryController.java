@@ -8,6 +8,7 @@ import ru.yandex.practicum.iteractionapi.dto.DeliveryDto;
 import ru.yandex.practicum.iteractionapi.dto.OrderDto;
 import ru.yandex.practicum.service.DeliveryService;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Slf4j
@@ -42,7 +43,7 @@ public class DeliveryController {
     }
 
     @PostMapping("/cost")
-    public Double deliveryCost(OrderDto orderDto) {
+    public BigDecimal deliveryCost(OrderDto orderDto) {
         log.info("Расчёт полной стоимости доставки заказа {}", orderDto);
         return deliveryService.deliveryCost(orderDto);
     }

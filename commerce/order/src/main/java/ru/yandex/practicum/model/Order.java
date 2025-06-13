@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import ru.yandex.practicum.iteractionapi.enums.OrderState;
 
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.UUID;
 
@@ -34,7 +35,12 @@ public class Order {
     double deliveryWeight;
     double deliveryVolume;
     boolean fragile;
-    double totalPrice;
-    double deliveryPrice;
-    double productPrice;
+    @Column(precision = 19, scale = 4)
+    BigDecimal totalPrice;
+
+    @Column(precision = 19, scale = 4)
+    BigDecimal deliveryPrice;
+
+    @Column(precision = 19, scale = 4)
+    BigDecimal productPrice;
 }

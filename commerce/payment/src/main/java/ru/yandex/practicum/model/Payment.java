@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import ru.yandex.practicum.iteractionapi.enums.PaymentState;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Entity
@@ -20,10 +21,17 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.UUID)
     UUID paymentId;
     UUID orderId;
-    double productsTotal;
-    double deliveryTotal;
-    double totalPayment;
-    double feeTotal;
+    @Column(precision = 19, scale = 4)
+    BigDecimal productsTotal;
+
+    @Column(precision = 19, scale = 4)
+    BigDecimal deliveryTotal;
+
+    @Column(precision = 19, scale = 4)
+    BigDecimal totalPayment;
+
+    @Column(precision = 19, scale = 4)
+    BigDecimal feeTotal;
     @Enumerated(EnumType.STRING)
     PaymentState status;
 }

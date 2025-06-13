@@ -16,6 +16,7 @@ import ru.yandex.practicum.mapper.PaymentMapper;
 import ru.yandex.practicum.model.Payment;
 import ru.yandex.practicum.repository.PaymentRepository;
 
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.UUID;
 
@@ -42,12 +43,14 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional(readOnly = true)
-    public Double getTotalCost(OrderDto orderDto) {
+    public BigDecimal getTotalCost(OrderDto orderDto) {
         log.info("Расчет общей стоимости заказа {}", orderDto.getOrderId());
         if (orderDto.getDeliveryPrice() == null || orderDto.getProductPrice() == null) {
             throw new NotEnoughInfoInOrderToCalculateException("Необходимо установить цену доставки и стоимость продукта");
         }
-        double totalCost = orderDto.getProductPrice() * 1.1 + orderDto.getDeliveryPrice();
+        BigDecimal totalCost = orderDto.getProductPrice()
+                .multiply(new BigDecimal("1.1"))
+                .add(orderDto.getDeliveryPrice());
         log.info("Общая стоимость заказа {}: {}", orderDto.getOrderId(), totalCost);
 
         return totalCost;
@@ -77,16 +80,18 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional(readOnly = true)
-    public Double productCost(OrderDto orderDto) {
+    public BigDecimal productCost(OrderDto orderDto) {
         log.info("Расчет стоимости товаров для заказа {}", orderDto.getOrderId());
-        double productCost = 0.0;
+        BigDecimal productCost = BigDecimal.ZERO;
 
         if (orderDto.getProducts() == null || orderDto.getProducts().isEmpty()) {
             throw new NotEnoughInfoInOrderToCalculateException("Отсутствуют товары в заказе");
         }
         for (Map.Entry<UUID, Long> entry : orderDto.getProducts().entrySet()) {
             ProductDto product = shoppingStoreClient.getProduct(entry.getKey());
-            productCost += product.getPrice() * entry.getValue();
+            BigDecimal productPrice = product.getPrice();
+            BigDecimal quantity = new BigDecimal(entry.getValue());
+            productCost = productCost.add(productPrice.multiply(quantity));
         }
         log.info("Стоимость товаров для заказа {}: {}", orderDto.getOrderId(), productCost);
         return productCost;

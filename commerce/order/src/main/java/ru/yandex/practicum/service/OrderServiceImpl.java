@@ -20,6 +20,7 @@ import ru.yandex.practicum.mapper.OrderMapper;
 import ru.yandex.practicum.model.Order;
 import ru.yandex.practicum.repository.OrderRepository;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -68,7 +69,13 @@ public class OrderServiceImpl implements OrderService {
         newOrder.setFragile(bookedProducts.getFragile());
         newOrder.setDeliveryVolume(bookedProducts.getDeliveryVolume());
         newOrder.setDeliveryWeight(bookedProducts.getDeliveryWeight());
-        newOrder.setProductPrice(paymentClient.productCost(orderMapper.toOrderDto(newOrder)));
+
+        OrderDto orderDto = orderMapper.toOrderDto(newOrder);
+        BigDecimal productPrice = paymentClient.productCost(orderDto);
+        newOrder.setProductPrice(productPrice);
+
+        BigDecimal totalPrice = paymentClient.getTotalCost(orderDto);
+        newOrder.setTotalPrice(totalPrice);
 
         DeliveryDto deliveryDto = DeliveryDto.builder()
                 .orderId(newOrder.getOrderId())

@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import ru.yandex.practicum.iteractionapi.enums.OrderState;
 
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.UUID;
 
@@ -26,7 +27,7 @@ public class OrderDto {
     Double deliveryWeight;
     Double deliveryVolume;
     Boolean fragile;
-    Double totalPrice;
-    Double deliveryPrice;
-    Double productPrice;
+    BigDecimal totalPrice;
+    BigDecimal deliveryPrice;
+    BigDecimal productPrice;
 }

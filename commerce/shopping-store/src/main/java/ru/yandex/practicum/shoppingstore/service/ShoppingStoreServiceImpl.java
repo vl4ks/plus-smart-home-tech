@@ -26,7 +26,7 @@ public class ShoppingStoreServiceImpl implements ShoppingStoreService {
     private final ProductMapper productMapper;
 
     @Override
-    public ProductDto findProductById(UUID productId) {
+    public ProductDto getProduct(UUID productId) {
         log.info("Запрос товара c id =: {}", productId);
 
         Product product = shoppingStoreRepository.findById(productId).orElseThrow(
